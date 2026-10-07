@@ -1,14 +1,10 @@
-"""
-FireGuard 应急疏散智能体决策中枢 (Cognitive Commander Agent)
-融合视觉感知、规范硬约束、确定性图寻路、个性化语音指令生成与事故记录归档
-"""
-
 import datetime
 import json
+import os
 from typing import Any, Dict, List, Optional
 
 from core.graph.topology import ConstructionGraph
-from core.perception.vlm_client import QwenVLPerceptionClient
+from core.llm.qwen_suite import QwenModelSuite
 from core.standards.rules_engine import ConstructionFireStandardsEngine
 
 
@@ -24,7 +20,7 @@ class FireGuardAgent:
     ):
         self.site_map_path = site_map_path
         self.graph = ConstructionGraph(site_json_path=site_map_path)
-        self.perception_client = QwenVLPerceptionClient(api_key=dashscope_api_key)
+        self.llm_suite = QwenModelSuite(api_key=dashscope_api_key)
         self.standards_engine = ConstructionFireStandardsEngine()
 
         # 智能体当前态势上下文
@@ -74,32 +70,32 @@ class FireGuardAgent:
 
         elif act_key == "ACT_2_FIRE":
             self.current_act = "ACT_2_FIRE"
-            # 调用 VLM 感知工具
-            perception = self.perception_client.analyze_scene_image(
-                image_url_or_path=image_url or "mock://fire_scene.jpg",
+            img_path = os.path.join("web_dashboard", "assets", "fire_cctv.jpg")
+            perception = self.llm_suite.analyze_surveillance_snapshot(
+                image_path=img_path,
                 scenario_key="incident_fire_act2"
             )
+            perception["image_url"] = "/assets/fire_cctv.jpg"
+            perception["camera_id"] = "CAM-07 (3F 核心筒东干道)"
             self.last_perception_result = perception
 
-            # 将感知认知结果作用于施工拓扑图
+            # 明火阻断东侧主干道及配电箱
             affected = perception.get("affected_edges", ["E_NCORR_REBAR", "E_REBAR_EXITEAST"])
             for eid in affected:
-                # 明火阻断东侧主干道
                 self.graph.update_edge_hazard(
                     edge_id=eid,
-                    fire_risk=0.95,
-                    smoke_risk=0.9,
+                    fire_risk=0.98,
+                    smoke_risk=0.95,
                     is_blocked=False
                 )
 
-            # 核心筒产生烟囱效应烟气蔓延
-            self.graph.update_edge_hazard("E_NCORR_CORE", fire_risk=0.1, smoke_risk=0.6)
+            # 核心筒垂直井道烟囱效应扩散
+            self.graph.update_edge_hazard("E_NCORR_CORE", fire_risk=0.15, smoke_risk=0.7)
 
-            # 触发确定性图重规划
             self.replan()
             summary = (
-                f"【突发火情告警】Qwen-VL识别到东干道严重火情与浓烟，"
-                f"智能体已紧急切断通往【东侧主楼梯】高危通道，动态调度工友转向【西侧避难爬梯】及【南避难平台】！"
+                f"【qwen3-vl-flash 火情预警】东侧主通道与配电箱处检测到明火与剧烈浓烟扩散，"
+                f"智能体已执行 GB/T 50720 硬隔离，切断【东侧主楼梯 (出口A)】，全员动态分流至西外架爬梯与南避难平台！"
             )
             self._log_event(timestamp, "FIRE_ALARM_REROUTE", summary, perception)
             return {
@@ -112,25 +108,27 @@ class FireGuardAgent:
 
         elif act_key == "ACT_3_BLOCKAGE":
             self.current_act = "ACT_3_BLOCKAGE"
-            perception = self.perception_client.analyze_scene_image(
-                image_url_or_path=image_url or "mock://scaffold_collapse.jpg",
+            img_path = os.path.join("web_dashboard", "assets", "scaffold_cctv.jpg")
+            perception = self.llm_suite.analyze_surveillance_snapshot(
+                image_path=img_path,
                 scenario_key="incident_blockage_act3"
             )
+            perception["image_url"] = "/assets/scaffold_cctv.jpg"
+            perception["camera_id"] = "CAM-04 (西侧外架临时连廊)"
             self.last_perception_result = perception
 
             # 西侧脚手架通道坍塌占道，低于0.6m规范极限
             self.graph.update_edge_hazard(
                 edge_id="E_WCORR_EXITWEST",
                 fire_risk=0.0,
-                smoke_risk=0.4,
+                smoke_risk=0.5,
                 is_blocked=True
             )
 
-            # 再次触发全局重规划
             self.replan()
             summary = (
-                f"【次生险情阻断】检测到西侧避难爬梯通道因支架坍塌受阻（净宽仅0.35m，违反GB/T 50720规范），"
-                f"智能体执行二次重规划：将受困木工班组调流至【南立面临时避难平台C】，启动登高云梯车外部接驳方案！"
+                f"【次生险情阻断】qwen3-vl-flash 识别到西侧走廊模板脚手架坍塌（实测通行净宽 0.35m < 0.6m规范极限），"
+                f"智能体二次重规划触发：受阻工友全员调流至【南立面临时避难平台C】，启动登高云梯接驳避险方案！"
             )
             self._log_event(timestamp, "SECONDARY_OBSTACLE_REROUTE", summary, perception)
             return {
@@ -144,23 +142,36 @@ class FireGuardAgent:
         return {"error": "Unknown act key"}
 
     def _generate_worker_broadcasts(self, routes: List[Dict]) -> List[Dict]:
-        """为每位工友生成个性化、语音与交互屏导引指令"""
+        """为每位工友生成个性化方言避险语音指令 (调用 qwen-turbo)"""
         broadcasts = []
+        dialect_map = {
+            "W01": "hunan",     # 李强 (湖南籍)
+            "W02": "sichuan",   # 王建国 (四川籍)
+            "W03": "mandarin",  # 张伟 (普通话)
+            "W04": "hunan"      # 赵红兵 (湖南籍)
+        }
+
         for r in routes:
+            w_id = r["worker_id"]
             w_name = r["worker_name"]
             w_role = r["worker_role"]
             exit_name = r.get("exit_name", "安全区域")
             status = r.get("status")
+            dialect = dialect_map.get(w_id, "mandarin")
 
             if status == "ROUTE_READY":
                 dist = r["distance_m"]
                 est_time = r["est_time_sec"]
                 path_desc = " ➔ ".join([self.graph.nodes[n]["name"] for n in r["path"]])
 
-                audio_text = (
-                    f"【应急疏散指令】{w_name}师傅（{w_role}）：请注意！"
-                    f"您前方危险区已隔离。请立即向【{exit_name}】撤离！"
-                    f"途经路线：{path_desc}。预计耗时约{est_time}秒，请压低身姿，用湿毛巾捂住口鼻！"
+                # 调用大模型生成方言指令
+                audio_text = self.llm_suite.generate_dialect_broadcast(
+                    worker_name=w_name,
+                    role=w_role,
+                    dialect=dialect,
+                    target_exit=exit_name,
+                    path_desc=path_desc,
+                    est_seconds=est_time
                 )
                 level = "URGENT" if self.current_act != "ACT_1_NORMAL" else "INFO"
             else:
@@ -171,9 +182,10 @@ class FireGuardAgent:
                 level = "CRITICAL"
 
             broadcasts.append({
-                "worker_id": r["worker_id"],
+                "worker_id": w_id,
                 "worker_name": w_name,
                 "worker_role": w_role,
+                "dialect": dialect,
                 "device": r.get("device", "智能安全帽"),
                 "alert_level": level,
                 "audio_script": audio_text,
@@ -191,42 +203,17 @@ class FireGuardAgent:
 
     def query_agent_chat(self, user_question: str) -> str:
         """
-        人机协同交互问答：安全总监通过自然语言即时查询现场态势
-        智能体根据当前拓扑、工友位置、火情感知与GB/T 50720规范作出权威解答
+        人机协同指挥问答：安全总监通过自然语言即时查询现场态势
+        调用 qwen3.7-plus 结合当前拓扑与 GB/T 50720 规则权威解答
         """
-        q = user_question.strip().lower()
         routes = self.last_plan_result.get("routes", []) if self.last_plan_result else []
-        exits_status = self.graph.get_exits()
+        compliance = self.last_plan_result.get("compliance_audit", {}) if self.last_plan_result else {}
 
-        if "出口" in q or "安全" in q or "走哪" in q:
-            if self.current_act == "ACT_1_NORMAL":
-                return "【指挥部答复】当前全场通行正常。东侧主楼梯（出口A）与西侧外架爬梯（出口B）均符合GB/T 50720净宽要求，所有工友已分配至最近出口。"
-            elif self.current_act == "ACT_2_FIRE":
-                return "【紧急避险答复】警报！东侧主楼梯（出口A）已被明火和浓烟完全封闭！当前西侧避难爬梯（出口B）及南侧临时卸料平台（避难平台C）为绝对推荐安全路径，已引导工友全速转进。"
-            else:
-                return "【二次重规划答复】注意！西侧避难爬梯因脚手架坍塌已无法通行（净宽仅0.35m，违背GB/T 50720第4.3.2条）。智能体已启动三级备用方案，引导全体受困工友转入【南立面临时避难平台C】，特勤云梯车正在登高接驳！"
-
-        if "工友" in q or "李强" in q or "王建国" in q or "张伟" in q or "赵红兵" in q:
-            details = []
-            for r in routes:
-                details.append(f"{r['worker_name']}（{r['worker_role']}）：目标【{r['exit_name']}】，剩余距离{r['distance_m']}米，预计用时{r['est_time_sec']}秒")
-            return "【现场工友追踪简报】\n" + "\n".join(details)
-
-        if "规范" in q or "gb" in q or "标准" in q:
-            audit = self.last_plan_result.get("compliance_audit", {})
-            return (
-                f"【GB/T 50720-2011 合规审计】\n"
-                f"- 规则版本: {audit.get('standards_version')}\n"
-                f"- 双出口分流状态: {'合规' if audit.get('dual_exit_compliant') else '警告'}\n"
-                f"- 最大单人疏散距离: {audit.get('max_evac_distance_m')}米（符合临时疏散冗余要求）\n"
-                f"- 审计附注: {', '.join(audit.get('audit_notes', []))}"
-            )
-
-        # 默认态势总结
-        return (
-            f"【智能体态势答复】当前系统处于【{self.current_act}】阶段。"
-            f"在册追踪人员 {len(routes)} 人，均已下发针对性避险语音与路线引导。"
-            f"多模态感知摘要: {self.last_perception_result.get('agent_perception_summary', '正常') if self.last_perception_result else '常态'}"
+        return self.llm_suite.ask_commander_copilot(
+            question=user_question,
+            current_act=self.current_act,
+            routes=routes,
+            compliance_audit=compliance
         )
 
     def export_formal_emergency_report(self) -> Dict[str, Any]:
