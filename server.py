@@ -134,6 +134,12 @@ class FireGuardRequestHandler(SimpleHTTPRequestHandler):
             self._send_json(res)
             return
 
+        elif path == "/api/chat":
+            question = req_data.get("question", "")
+            answer = agent_instance.query_agent_chat(user_question=question)
+            self._send_json({"question": question, "answer": answer})
+            return
+
         elif path == "/api/reset":
             res = agent_instance.handle_incident("ACT_1_NORMAL")
             self._send_json(res)

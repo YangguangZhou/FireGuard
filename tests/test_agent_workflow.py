@@ -78,6 +78,19 @@ class TestFireGuardWorkflow(unittest.TestCase):
         self.assertIn("report_id", report)
         self.assertEqual(report["current_scenario_state"], "ACT_3_BLOCKAGE")
 
+    def test_agent_copilot_chat(self):
+        """测试安全总监 Copilot 自然语言对话交互"""
+        ans1 = self.agent.query_agent_chat("当前哪个出口最安全？")
+        self.assertIn("【指挥部答复】", ans1)
+
+        ans2 = self.agent.query_agent_chat("木工李强班组撤离到了哪里？")
+        self.assertIn("李强", ans2)
+        self.assertIn("目标", ans2)
+
+        ans3 = self.agent.query_agent_chat("当前方案是否符合GB/T 50720？")
+        self.assertIn("GB/T 50720", ans3)
+        self.assertIn("合规审计", ans3)
+
 
 if __name__ == "__main__":
     unittest.main()

@@ -1,0 +1,240 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1600 900" width="1600" height="900" style="background:#080d16;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Helvetica,sans-serif;">
+  <defs>
+    <linearGradient id="headerGrad" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" stop-color="#ef4444" />
+      <stop offset="50%" stop-color="#f59e0b" />
+      <stop offset="100%" stop-color="#10b981" />
+    </linearGradient>
+    <linearGradient id="cardGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#0f172a" />
+      <stop offset="100%" stop-color="#1e293b" />
+    </linearGradient>
+    <filter id="glow">
+      <feGaussianBlur stdDeviation="3" result="coloredBlur"/>
+      <feMerge>
+        <feMergeNode in="coloredBlur"/>
+        <feMergeNode in="SourceGraphic"/>
+      </feMerge>
+    </filter>
+    <marker id="arrow" viewBox="0 0 10 10" refX="6" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+      <path d="M 0 1 L 10 5 L 0 9 z" fill="#38bdf8" />
+    </marker>
+    <marker id="arrow-green" viewBox="0 0 10 10" refX="6" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+      <path d="M 0 1 L 10 5 L 0 9 z" fill="#10b981" />
+    </marker>
+  </defs>
+
+  <!-- 背景暗纹与边框 -->
+  <rect x="20" y="20" width="1560" height="860" rx="20" fill="#0b1120" stroke="#1e293b" stroke-width="2" />
+
+  <!-- 顶部标题栏 -->
+  <g transform="translate(60, 50)">
+    <rect x="0" y="0" width="60" height="60" rx="12" fill="url(#headerGrad)" />
+    <text x="30" y="40" font-size="32" text-anchor="middle">🔥</text>
+    
+    <text x="80" y="32" font-size="28" font-weight="900" fill="#ffffff" letter-spacing="1.5">FireGuard（筑安·火眼）系统技术架构与数据流全景图</text>
+    <text x="80" y="55" font-size="14" fill="#94a3b8">面向动态施工环境的多模态火灾应急疏散智能体 · 第一届“海之子”杯AI智能体挑战计划初赛技术架构交付物</text>
+    
+    <rect x="1180" y="10" width="280" height="40" rx="8" fill="#1e293b" stroke="#334155" />
+    <text x="1320" y="35" font-size="13" font-weight="bold" fill="#38bdf8" text-anchor="middle">中建国际 × 中南大学联合团队</text>
+  </g>
+
+  <!-- 分割线 -->
+  <line x1="60" y1="130" x2="1520" y2="130" stroke="#334155" stroke-width="1.5" stroke-dasharray="6 4" />
+
+  <!-- 1. 多模态态势感知输入层 -->
+  <g transform="translate(60, 160)">
+    <rect x="0" y="0" width="320" height="680" rx="16" fill="url(#cardGrad)" stroke="#1e293b" stroke-width="1.5" />
+    <rect x="0" y="0" width="320" height="44" rx="16" fill="#1e293b" />
+    <text x="20" y="28" font-size="16" font-weight="bold" fill="#38bdf8">1. 多源多模态感知输入层</text>
+
+    <!-- 监控视频流 -->
+    <g transform="translate(20, 65)">
+      <rect x="0" y="0" width="280" height="135" rx="10" fill="#090d16" stroke="#334155" />
+      <text x="15" y="28" font-size="14" font-weight="bold" fill="#f87171">📹 施工监控视频流 (RTSP/ONVIF)</text>
+      <text x="15" y="52" font-size="11" fill="#94a3b8">• 核心筒、主施工通道、电焊区 1080P 抓拍</text>
+      <rect x="15" y="65" width="250" height="55" rx="6" fill="#1e293b" />
+      <text x="25" y="88" font-size="12" font-weight="bold" fill="#f59e0b">Qwen-VL-Plus (Vision Transformer)</text>
+      <text x="25" y="106" font-size="10" fill="#cbd5e1">火焰/浓烟识别 (置信度 96%) + 施工占道检测</text>
+    </g>
+
+    <!-- 物理传感器 -->
+    <g transform="translate(20, 220)">
+      <rect x="0" y="0" width="280" height="130" rx="10" fill="#090d16" stroke="#334155" />
+      <text x="15" y="28" font-size="14" font-weight="bold" fill="#f59e0b">📟 现场时序传感器网</text>
+      <text x="15" y="52" font-size="11" fill="#94a3b8">• 光电烟雾浓度传感器 (PPM)</text>
+      <text x="15" y="72" font-size="11" fill="#94a3b8">• 结构温度变送器 (℃ 阈值55.0)</text>
+      <text x="15" y="92" font-size="11" fill="#94a3b8">• 一氧化碳气体探头 (CO 阈值30)</text>
+      <text x="15" y="112" font-size="10" fill="#10b981">MQTT 边缘网关毫秒级遥测汇聚</text>
+    </g>
+
+    <!-- 人员位姿追踪 -->
+    <g transform="translate(20, 370)">
+      <rect x="0" y="0" width="280" height="130" rx="10" fill="#090d16" stroke="#334155" />
+      <text x="15" y="28" font-size="14" font-weight="bold" fill="#38bdf8">👷 工友穿戴动态追踪</text>
+      <text x="15" y="52" font-size="11" fill="#94a3b8">• 智能安全帽 (集成骨传导与声光灯)</text>
+      <text x="15" y="72" font-size="11" fill="#94a3b8">• UWB 智能工牌 (厘米级空间定位)</text>
+      <text x="15" y="92" font-size="11" fill="#94a3b8">• 生理体征监测 (心率/失足跌倒报警)</text>
+      <text x="15" y="112" font-size="10" fill="#a855f7">实时工友网格节点拓扑对齐映射</text>
+    </g>
+
+    <!-- BIM空间数据 -->
+    <g transform="translate(20, 520)">
+      <rect x="0" y="0" width="280" height="135" rx="10" fill="#090d16" stroke="#334155" />
+      <text x="15" y="28" font-size="14" font-weight="bold" fill="#10b981">🏛️ 施工BIM与临时拓扑</text>
+      <text x="15" y="52" font-size="11" fill="#94a3b8">• 施工期阶段动态平面布置图</text>
+      <text x="15" y="72" font-size="11" fill="#94a3b8">• 预留孔洞、垂直管道井空间标定</text>
+      <text x="15" y="92" font-size="11" fill="#94a3b8">• 临时外架爬梯/卸料平台动态状态</text>
+      <text x="15" y="115" font-size="10" fill="#38bdf8">GeoJSON 拓扑图元自动解析提取</text>
+    </g>
+  </g>
+
+  <!-- 感知层 -> 决策层 数据流箭头 -->
+  <line x1="390" y1="360" x2="440" y2="360" stroke="#38bdf8" stroke-width="3" marker-end="url(#arrow)" />
+  <line x1="390" y1="580" x2="440" y2="580" stroke="#38bdf8" stroke-width="3" marker-end="url(#arrow)" />
+
+  <!-- 2. FireGuard 智能体认知决策中枢层 -->
+  <g transform="translate(450, 160)">
+    <rect x="0" y="0" width="370" height="680" rx="16" fill="url(#cardGrad)" stroke="#1e293b" stroke-width="1.5" />
+    <rect x="0" y="0" width="370" height="44" rx="16" fill="#1e293b" />
+    <text x="20" y="28" font-size="16" font-weight="bold" fill="#f59e0b">2. 智能体认知决策中枢 (Agent Core)</text>
+
+    <!-- 智能体大脑 ReAct Loop -->
+    <g transform="translate(20, 65)">
+      <rect x="0" y="0" width="330" height="150" rx="10" fill="#090d16" stroke="#f59e0b" stroke-width="1.2" />
+      <text x="15" y="26" font-size="14" font-weight="bold" fill="#f59e0b">🧠 ReAct 自主决策状态机</text>
+      <text x="15" y="50" font-size="11" fill="#cbd5e1">• Thought: 综合多模态视像与传感器阈值</text>
+      <text x="15" y="70" font-size="11" fill="#cbd5e1">• Action: 调用规范规则引擎与图算力工具</text>
+      <text x="15" y="90" font-size="11" fill="#cbd5e1">• Observation: 检验通道合规度与双出口负载</text>
+      <text x="15" y="110" font-size="11" fill="#cbd5e1">• Re-planning: 通道突发阻断 5s 内二次重规</text>
+      <text x="15" y="132" font-size="10" font-weight="bold" fill="#10b981">自然语言 Copilot 人机协同问答接口内嵌</text>
+    </g>
+
+    <!-- GB/T 50720 规则引擎 -->
+    <g transform="translate(20, 235)">
+      <rect x="0" y="0" width="330" height="210" rx="10" fill="#090d16" stroke="#ef4444" stroke-width="1.2" />
+      <text x="15" y="26" font-size="14" font-weight="bold" fill="#ef4444">⚖️ GB/T 50720-2011 规则引擎</text>
+      <text x="15" y="50" font-size="11" fill="#94a3b8">《建设工程施工现场消防安全技术标准》强约束:</text>
+      <text x="15" y="75" font-size="11" fill="#cbd5e1">1. 地面疏散通道净宽 ≥ 1.5m (第4.3.2条)</text>
+      <text x="15" y="95" font-size="11" fill="#cbd5e1">2. 利用已施工结构/楼梯净宽 ≥ 1.0m</text>
+      <text x="15" y="115" font-size="11" fill="#cbd5e1">3. 爬梯及脚手架通道净宽 ≥ 0.6m</text>
+      <text x="15" y="135" font-size="11" fill="#cbd5e1">4. 疏散距离 ≤ 15m (危化品库房 ≤ 10m)</text>
+      <text x="15" y="155" font-size="11" fill="#cbd5e1">5. 临空面防护栏杆高度 ≥ 1.2m</text>
+      <rect x="15" y="170" width="300" height="28" rx="4" fill="#312e81" />
+      <text x="25" y="188" font-size="10" font-weight="bold" fill="#a5b4fc">硬约束判定：不合规通道权重惩罚 = ∞ (切断)</text>
+    </g>
+
+    <!-- 烟气动力学物理推演 -->
+    <g transform="translate(20, 465)">
+      <rect x="0" y="0" width="330" height="190" rx="10" fill="#090d16" stroke="#334155" />
+      <text x="15" y="26" font-size="14" font-weight="bold" fill="#38bdf8">🌪️ 施工烟火扩散动力学推演</text>
+      <text x="15" y="52" font-size="11" fill="#cbd5e1">• 水平前锋蔓延: V = 0.5 ~ 0.8 m/s</text>
+      <text x="15" y="74" font-size="11" fill="#cbd5e1">• 竖向管道井“烟囱效应”: V = 3.0 ~ 5.0 m/s</text>
+      <text x="15" y="96" font-size="11" fill="#cbd5e1">• 动态时空威胁窗: T_reach = D / V_smoke</text>
+      <text x="15" y="120" font-size="11" fill="#f87171">烟囱效应安全锁定机制:</text>
+      <text x="15" y="140" font-size="10" fill="#94a3b8">一旦洞口下方感知起火，瞬时拉黑垂直上下层5m走廊</text>
+      <text x="15" y="165" font-size="10" font-weight="bold" fill="#10b981">产出: 动态拓扑边危险度向量 [R_fire, R_smoke]</text>
+    </g>
+  </g>
+
+  <!-- 决策层 -> 算力层 数据流箭头 -->
+  <line x1="830" y1="450" x2="880" y2="450" stroke="#f59e0b" stroke-width="3" marker-end="url(#arrow)" />
+
+  <!-- 3. 确定性计算与规划核心引擎 -->
+  <g transform="translate(890, 160)">
+    <rect x="0" y="0" width="340" height="680" rx="16" fill="url(#cardGrad)" stroke="#1e293b" stroke-width="1.5" />
+    <rect x="0" y="0" width="340" height="44" rx="16" fill="#1e293b" />
+    <text x="20" y="28" font-size="16" font-weight="bold" fill="#10b981">3. 确定性计算与规划引擎</text>
+
+    <!-- 动态加权拓扑图模型 -->
+    <g transform="translate(20, 65)">
+      <rect x="0" y="0" width="300" height="190" rx="10" fill="#090d16" stroke="#10b981" stroke-width="1.2" />
+      <text x="15" y="26" font-size="14" font-weight="bold" fill="#10b981">📐 动态加权拓扑图模型</text>
+      <text x="15" y="52" font-size="11" fill="#94a3b8">通道边综合代价 Cost 评估方程:</text>
+      <rect x="15" y="65" width="270" height="50" rx="6" fill="#1e293b" />
+      <text x="25" y="92" font-size="11" font-weight="bold" fill="#f87171">Cost = L × (1 + α·R_fire + β·R_smoke)</text>
+      <text x="25" y="108" font-size="11" font-weight="bold" fill="#38bdf8">       + γ·Crowd + Penalty_obs</text>
+      <text x="15" y="132" font-size="10" fill="#cbd5e1">• L: 通道实际物理几何长度 (m)</text>
+      <text x="15" y="148" font-size="10" fill="#cbd5e1">• Crowd: 动态人流拥挤度，避免踩踏</text>
+      <text x="15" y="164" font-size="10" fill="#cbd5e1">• Penalty: 违背GB/T 50720净宽加严惩罚</text>
+    </g>
+
+    <!-- 加权 A* 寻路求解器 -->
+    <g transform="translate(20, 275)">
+      <rect x="0" y="0" width="300" height="180" rx="10" fill="#090d16" stroke="#334155" />
+      <text x="15" y="26" font-size="14" font-weight="bold" fill="#38bdf8">⚡ 加权 A* 多目标寻路核心</text>
+      <text x="15" y="52" font-size="11" fill="#cbd5e1">• 启发函数: 欧氏距离下界 h(n)</text>
+      <text x="15" y="74" font-size="11" fill="#cbd5e1">• 寻路性能: 全楼层重规划时延 ≤ 5ms</text>
+      <text x="15" y="96" font-size="11" fill="#cbd5e1">• 可靠性承诺: 100% 杜绝火源禁行区穿行</text>
+      <text x="15" y="118" font-size="11" fill="#cbd5e1">• 数学保底: 无死锁、无回环、确定性收敛</text>
+      <rect x="15" y="135" width="270" height="28" rx="4" fill="#064e3b" />
+      <text x="25" y="153" font-size="10" font-weight="bold" fill="#6ee7b7">解耦大模型黑盒，保障生命救援绝对安全</text>
+    </g>
+
+    <!-- 双出口均衡分流器 -->
+    <g transform="translate(20, 475)">
+      <rect x="0" y="0" width="300" height="180" rx="10" fill="#090d16" stroke="#334155" />
+      <text x="15" y="26" font-size="14" font-weight="bold" fill="#f59e0b">🚪 GB 50016 双出口均衡分流</text>
+      <text x="15" y="52" font-size="11" fill="#cbd5e1">• 出口A (东现浇楼梯间) 标称容量 30人</text>
+      <text x="15" y="74" font-size="11" fill="#cbd5e1">• 出口B (西外架避难爬梯) 标称容量 15人</text>
+      <text x="15" y="96" font-size="11" fill="#cbd5e1">• 平台C (南立面临时避难平台) 登高救援</text>
+      <text x="15" y="122" font-size="10" fill="#94a3b8">防止群体恐慌单向扎堆引发群死群伤</text>
+      <text x="15" y="145" font-size="10" font-weight="bold" fill="#10b981">输出: 全员个性化最优撤离路径元组表</text>
+    </g>
+  </g>
+
+  <!-- 算力层 -> 交互层 数据流箭头 -->
+  <line x1="1240" y1="450" x2="1290" y2="450" stroke="#10b981" stroke-width="3" marker-end="url(#arrow-green)" />
+
+  <!-- 4. 多端人机协同输出交互层 -->
+  <g transform="translate(1300, 160)">
+    <rect x="0" y="0" width="220" height="680" rx="16" fill="url(#cardGrad)" stroke="#1e293b" stroke-width="1.5" />
+    <rect x="0" y="0" width="220" height="44" rx="16" fill="#1e293b" />
+    <text x="15" y="28" font-size="15" font-weight="bold" fill="#a855f7">4. 多端人机协同交互</text>
+
+    <!-- 指挥部大屏 -->
+    <g transform="translate(15, 65)">
+      <rect x="0" y="0" width="190" height="180" rx="10" fill="#090d16" stroke="#38bdf8" />
+      <text x="12" y="24" font-size="13" font-weight="bold" fill="#38bdf8">🖥️ 智慧工地指挥大屏</text>
+      <text x="12" y="46" font-size="10" fill="#94a3b8">• Vue 3 + Tailwind CSS</text>
+      <text x="12" y="66" font-size="10" fill="#cbd5e1">• 2D 拓扑动态光流态势</text>
+      <text x="12" y="86" font-size="10" fill="#cbd5e1">• 三幕剧一键推演与回放</text>
+      <text x="12" y="106" font-size="10" fill="#cbd5e1">• 监控快照与VLM比对弹窗</text>
+      <text x="12" y="126" font-size="10" fill="#cbd5e1">• 安全总监 Copilot 问答</text>
+      <rect x="10" y="142" width="170" height="24" rx="4" fill="#0369a1" />
+      <text x="95" y="158" font-size="10" font-weight="bold" fill="white" text-anchor="middle">毫米级响应 · 零闪退</text>
+    </g>
+
+    <!-- 工友终端定向语音 -->
+    <g transform="translate(15, 265)">
+      <rect x="0" y="0" width="190" height="190" rx="10" fill="#090d16" stroke="#10b981" />
+      <text x="12" y="24" font-size="13" font-weight="bold" fill="#10b981">📢 工友智能安全帽</text>
+      <text x="12" y="46" font-size="10" fill="#94a3b8">• 骨传导双向语音指令</text>
+      <text x="12" y="66" font-size="10" fill="#cbd5e1">• 定向声光指引避险灯</text>
+      <text x="12" y="88" font-size="10" font-weight="bold" fill="#f59e0b">“李师傅：东楼梯已断，</text>
+      <text x="12" y="106" font-size="10" font-weight="bold" fill="#f59e0b">请立即向西走避难爬梯！”</text>
+      <text x="12" y="130" font-size="10" fill="#94a3b8">• 支持多方言口语化播报</text>
+      <text x="12" y="150" font-size="10" fill="#94a3b8">• 弱网/断网离线保底协议</text>
+      <rect x="10" y="160" width="170" height="20" rx="4" fill="#064e3b" />
+      <text x="95" y="174" font-size="9" font-weight="bold" fill="#6ee7b7" text-anchor="middle">千人千面 · 精准下达</text>
+    </g>
+
+    <!-- 应急记录单 -->
+    <g transform="translate(15, 475)">
+      <rect x="0" y="0" width="190" height="180" rx="10" fill="#090d16" stroke="#f87171" />
+      <text x="12" y="24" font-size="13" font-weight="bold" fill="#f87171">📄 规范应急处置记录</text>
+      <text x="12" y="48" font-size="10" fill="#cbd5e1">• 消防特勤处置记录单</text>
+      <text x="12" y="68" font-size="10" fill="#cbd5e1">• 被困工友坐标清单</text>
+      <text x="12" y="88" font-size="10" fill="#cbd5e1">• 火源方位与烟羽前锋</text>
+      <text x="12" y="108" font-size="10" fill="#cbd5e1">• 登高车云梯接驳点</text>
+      <text x="12" y="128" font-size="10" fill="#cbd5e1">• 一键打印 / PDF导出</text>
+      <rect x="10" y="145" width="170" height="24" rx="4" fill="#7f1d1d" />
+      <text x="95" y="161" font-size="10" font-weight="bold" fill="white" text-anchor="middle">符合应急管理闭环标准</text>
+    </g>
+  </g>
+
+  <!-- 底部微标信息 -->
+  <g transform="translate(60, 855)">
+    <text x="0" y="10" font-size="11" fill="#64748b">架构设计原则：神经-符号双轮驱动 (Neural-Symbolic Architecture) · 空间合规受控 · 确定性路径寻路 · 人机协同应急闭环</text>
+  </g>
+</svg>
