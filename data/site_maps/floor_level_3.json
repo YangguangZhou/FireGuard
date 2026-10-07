@@ -1,0 +1,268 @@
+{
+  "project_meta": {
+    "project_name": "中建海龙模块化绿色建造示范工程 - 3号地块",
+    "floor_level": "3F 结构主体施工作业层",
+    "total_area_sqm": 2400,
+    "current_phase": "核心筒浇筑及外立面支架施工期",
+    "standard_applied": "GB/T 50720-2011 / GB 50016-2014"
+  },
+  "nodes": [
+    {
+      "id": "N_WOOD",
+      "name": "木工模板加工区",
+      "zone_type": "work_zone",
+      "hazard_level": "high",
+      "description": "堆放有木方、多层板、电锯切割设备，富集易燃物",
+      "coords": {"x": 160, "y": 140}
+    },
+    {
+      "id": "N_REBAR",
+      "name": "钢筋绑扎作业区",
+      "zone_type": "work_zone",
+      "hazard_level": "medium",
+      "description": "钢筋骨架绑扎，存在动火电焊点",
+      "coords": {"x": 580, "y": 140}
+    },
+    {
+      "id": "N_CORE_TUBE",
+      "name": "核心筒施工作业面",
+      "zone_type": "core_shaft",
+      "hazard_level": "high",
+      "description": "混凝土剪力墙、预留管道井贯通上下层（烟囱效应风险区）",
+      "coords": {"x": 380, "y": 280}
+    },
+    {
+      "id": "N_PAINT_STORE",
+      "name": "防锈漆/油料临时堆放点",
+      "zone_type": "hazard_storage",
+      "hazard_level": "critical",
+      "description": "危险化学品临时暂存，规范要求疏散门距离<=10m",
+      "coords": {"x": 700, "y": 380}
+    },
+    {
+      "id": "N_CORRIDOR_NORTH",
+      "name": "北侧主施工干道",
+      "zone_type": "corridor",
+      "hazard_level": "low",
+      "description": "硬质水泥铺设通道，净宽2.2m",
+      "coords": {"x": 380, "y": 120}
+    },
+    {
+      "id": "N_CORRIDOR_EAST",
+      "name": "东侧物料转运走廊",
+      "zone_type": "corridor",
+      "hazard_level": "low",
+      "description": "连接钢筋区与东侧楼梯，净宽1.6m",
+      "coords": {"x": 660, "y": 240}
+    },
+    {
+      "id": "N_CORRIDOR_WEST",
+      "name": "西侧临时防护通道",
+      "zone_type": "corridor",
+      "hazard_level": "low",
+      "description": "靠近外架，临空面设1.2m坚固护栏，净宽1.4m",
+      "coords": {"x": 180, "y": 320}
+    },
+    {
+      "id": "N_CORRIDOR_SOUTH",
+      "name": "南侧结构连通走廊",
+      "zone_type": "corridor",
+      "hazard_level": "low",
+      "description": "临南侧挑梁，净宽1.8m",
+      "coords": {"x": 420, "y": 420}
+    },
+    {
+      "id": "EXIT_EAST",
+      "name": "安全出口A (东侧现浇主楼梯)",
+      "zone_type": "safe_exit",
+      "hazard_level": "safe",
+      "capacity": 30,
+      "description": "永久混凝土楼梯间（已安装临时防火应急照明）",
+      "coords": {"x": 760, "y": 140}
+    },
+    {
+      "id": "EXIT_WEST",
+      "name": "安全出口B (西侧外脚手架刚性爬梯)",
+      "zone_type": "safe_exit",
+      "hazard_level": "safe",
+      "capacity": 15,
+      "description": "符合GB/T 50720净宽0.8m钢质之字形避难爬梯",
+      "coords": {"x": 80, "y": 380}
+    },
+    {
+      "id": "EXIT_REFUGE",
+      "name": "临时避难平台C (南立面卸料作业平台)",
+      "zone_type": "refuge_platform",
+      "hazard_level": "safe",
+      "capacity": 10,
+      "description": "开敞式悬挑钢平台，具备消防云梯车外部救援登高面",
+      "coords": {"x": 320, "y": 490}
+    }
+  ],
+  "edges": [
+    {
+      "id": "E_WOOD_NCORR",
+      "from": "N_WOOD",
+      "to": "N_CORRIDOR_NORTH",
+      "base_length": 14.5,
+      "width_m": 1.6,
+      "edge_type": "structure",
+      "has_guardrail": true,
+      "current_status": "clear"
+    },
+    {
+      "id": "E_NCORR_REBAR",
+      "from": "N_CORRIDOR_NORTH",
+      "to": "N_REBAR",
+      "base_length": 16.0,
+      "width_m": 2.0,
+      "edge_type": "structure",
+      "has_guardrail": true,
+      "current_status": "clear"
+    },
+    {
+      "id": "E_REBAR_EXITEAST",
+      "from": "N_REBAR",
+      "to": "EXIT_EAST",
+      "base_length": 12.0,
+      "width_m": 1.8,
+      "edge_type": "structure",
+      "has_guardrail": true,
+      "current_status": "clear"
+    },
+    {
+      "id": "E_WOOD_WCORR",
+      "from": "N_WOOD",
+      "to": "N_CORRIDOR_WEST",
+      "base_length": 13.0,
+      "width_m": 1.2,
+      "edge_type": "structure",
+      "has_guardrail": true,
+      "current_status": "clear"
+    },
+    {
+      "id": "E_WCORR_EXITWEST",
+      "from": "N_CORRIDOR_WEST",
+      "to": "EXIT_WEST",
+      "base_length": 11.0,
+      "width_m": 0.9,
+      "edge_type": "scaffold_ladder",
+      "has_guardrail": true,
+      "current_status": "clear"
+    },
+    {
+      "id": "E_NCORR_CORE",
+      "from": "N_CORRIDOR_NORTH",
+      "to": "N_CORE_TUBE",
+      "base_length": 15.0,
+      "width_m": 1.5,
+      "edge_type": "structure",
+      "has_guardrail": true,
+      "current_status": "clear"
+    },
+    {
+      "id": "E_REBAR_ECORR",
+      "from": "N_REBAR",
+      "to": "N_CORRIDOR_EAST",
+      "base_length": 10.0,
+      "width_m": 1.4,
+      "edge_type": "structure",
+      "has_guardrail": true,
+      "current_status": "clear"
+    },
+    {
+      "id": "E_ECORR_PAINT",
+      "from": "N_CORRIDOR_EAST",
+      "to": "N_PAINT_STORE",
+      "base_length": 12.5,
+      "width_m": 1.2,
+      "edge_type": "structure",
+      "has_guardrail": true,
+      "current_status": "clear"
+    },
+    {
+      "id": "E_CORE_SCORR",
+      "from": "N_CORE_TUBE",
+      "to": "N_CORRIDOR_SOUTH",
+      "base_length": 13.5,
+      "width_m": 1.5,
+      "edge_type": "structure",
+      "has_guardrail": true,
+      "current_status": "clear"
+    },
+    {
+      "id": "E_SCORR_REFUGE",
+      "from": "N_CORRIDOR_SOUTH",
+      "to": "EXIT_REFUGE",
+      "base_length": 9.0,
+      "width_m": 1.5,
+      "edge_type": "temporary_bridge",
+      "has_guardrail": true,
+      "current_status": "clear"
+    },
+    {
+      "id": "E_WCORR_SCORR",
+      "from": "N_CORRIDOR_WEST",
+      "to": "N_CORRIDOR_SOUTH",
+      "base_length": 18.0,
+      "width_m": 1.4,
+      "edge_type": "structure",
+      "has_guardrail": true,
+      "current_status": "clear"
+    },
+    {
+      "id": "E_PAINT_SCORR",
+      "from": "N_PAINT_STORE",
+      "to": "N_CORRIDOR_SOUTH",
+      "base_length": 20.0,
+      "width_m": 1.2,
+      "edge_type": "structure",
+      "has_guardrail": true,
+      "current_status": "clear"
+    }
+  ],
+  "workers": [
+    {
+      "id": "W01",
+      "name": "李强",
+      "role": "模板班组长",
+      "current_node": "N_WOOD",
+      "heart_rate": 82,
+      "device": "智能安全帽 #101 (骨传导双向语音)",
+      "status": "normal"
+    },
+    {
+      "id": "W02",
+      "name": "王建国",
+      "role": "木工技师",
+      "current_node": "N_WOOD",
+      "heart_rate": 78,
+      "device": "智能安全帽 #102 (骨传导双向语音)",
+      "status": "normal"
+    },
+    {
+      "id": "W03",
+      "name": "张伟",
+      "role": "钢筋电焊工",
+      "current_node": "N_REBAR",
+      "heart_rate": 88,
+      "device": "智能工牌 #205 (UWB厘米级定位)",
+      "status": "normal"
+    },
+    {
+      "id": "W04",
+      "name": "赵红兵",
+      "role": "混凝土振捣工",
+      "current_node": "N_CORE_TUBE",
+      "heart_rate": 85,
+      "device": "智能安全帽 #108 (声光导引灯)",
+      "status": "normal"
+    }
+  ],
+  "sensors": [
+    {"id": "S_SMOKE_WOOD", "type": "smoke", "node_id": "N_WOOD", "ppm": 12, "threshold": 60},
+    {"id": "S_TEMP_WOOD", "type": "temp_c", "node_id": "N_WOOD", "value": 24.5, "threshold": 55.0},
+    {"id": "S_SMOKE_CORE", "type": "smoke", "node_id": "N_CORE_TUBE", "ppm": 15, "threshold": 60},
+    {"id": "S_SMOKE_PAINT", "type": "co_ppm", "node_id": "N_PAINT_STORE", "ppm": 5, "threshold": 30}
+  ]
+}
