@@ -1,0 +1,702 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>FireGuard 筑安·火眼 - 施工现场多模态火灾应急疏散智能指挥舱</title>
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <!-- Vue 3 CDN -->
+  <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            cyberDark: '#080d16',
+            cyberCard: '#0f172a',
+            cyberBorder: '#1e293b',
+            neonGreen: '#10b981',
+            neonBlue: '#38bdf8',
+            neonRed: '#ef4444',
+            neonAmber: '#f59e0b'
+          }
+        }
+      }
+    }
+  </script>
+  <style>
+    @keyframes pulseGlow {
+      0%, 100% { opacity: 0.8; filter: drop-shadow(0 0 8px rgba(16, 185, 129, 0.6)); }
+      50% { opacity: 0.4; filter: drop-shadow(0 0 2px rgba(16, 185, 129, 0.2)); }
+    }
+    @keyframes fireGlow {
+      0%, 100% { filter: drop-shadow(0 0 12px rgba(239, 68, 68, 0.8)); transform: scale(1); }
+      50% { filter: drop-shadow(0 0 20px rgba(245, 158, 11, 0.9)); transform: scale(1.04); }
+    }
+    .pulse-route {
+      animation: pulseGlow 1.8s infinite ease-in-out;
+    }
+    .fire-flame {
+      animation: fireGlow 1.2s infinite alternate ease-in-out;
+    }
+    /* 自定义滚动条 */
+    ::-webkit-scrollbar {
+      width: 5px;
+      height: 5px;
+    }
+    ::-webkit-scrollbar-track {
+      background: #0f172a;
+    }
+    ::-webkit-scrollbar-thumb {
+      background: #334155;
+      border-radius: 3px;
+    }
+  </style>
+</head>
+<body class="bg-cyberDark text-slate-100 font-sans antialiased min-h-screen flex flex-col select-none">
+  <div id="app" class="flex-1 flex flex-col p-3 md:p-5 gap-3 max-w-[1920px] mx-auto w-full">
+
+    <!-- 顶部科技 HUD 导航栏 -->
+    <header class="bg-cyberCard/80 backdrop-blur border border-cyberBorder rounded-xl p-4 flex flex-wrap justify-between items-center shadow-lg relative overflow-hidden">
+      <div class="absolute -top-10 -left-10 w-48 h-48 bg-neonBlue/10 rounded-full blur-3xl pointer-events-none"></div>
+      
+      <div class="flex items-center gap-3 z-10">
+        <div class="w-10 h-10 rounded-lg bg-gradient-to-br from-neonRed via-neonAmber to-neonGreen flex items-center justify-center font-black text-xl shadow-lg shadow-neonRed/30">
+          🔥
+        </div>
+        <div>
+          <div class="flex items-center gap-2">
+            <h1 class="text-xl md:text-2xl font-black tracking-wider bg-clip-text text-transparent bg-gradient-to-r from-white via-slate-200 to-neonBlue">
+              FireGuard 筑安·火眼
+            </h1>
+            <span class="text-xs px-2 py-0.5 rounded border border-neonGreen/40 bg-neonGreen/10 text-neonGreen font-semibold">
+              v2.0 智能体自主决策
+            </span>
+          </div>
+          <p class="text-xs text-slate-400">
+            面向动态施工环境的多模态火灾应急疏散智能中枢 · 中国建筑国际示范工程
+          </p>
+        </div>
+      </div>
+
+      <!-- 中间状态标签 -->
+      <div class="flex items-center gap-4 text-xs z-10 my-2 lg:my-0">
+        <div class="bg-slate-900/80 border border-slate-700/60 rounded-lg px-3 py-1.5 flex items-center gap-2">
+          <span class="text-slate-400">规范标准:</span>
+          <span class="text-neonBlue font-mono font-medium">GB/T 50720-2011 (实时强约束)</span>
+        </div>
+        <div class="bg-slate-900/80 border border-slate-700/60 rounded-lg px-3 py-1.5 flex items-center gap-2">
+          <span class="text-slate-400">视觉中枢:</span>
+          <span class="text-amber-400 font-mono font-medium">Qwen-VL 多模态模型</span>
+        </div>
+        <div class="bg-slate-900/80 border border-slate-700/60 rounded-lg px-3 py-1.5 flex items-center gap-2">
+          <span class="text-slate-400">作业面:</span>
+          <span class="text-slate-200 font-medium">3F 结构主体层</span>
+        </div>
+      </div>
+
+      <!-- 右侧态势等级与报告按钮 -->
+      <div class="flex items-center gap-3 z-10">
+        <div class="text-right">
+          <div class="text-xs text-slate-400">系统当前态势</div>
+          <div class="font-bold text-sm tracking-wide" :class="actBadgeClass">
+            {{ actTitle }}
+          </div>
+        </div>
+        <button 
+          @click="showReportModal = true; fetchReport()" 
+          class="px-3.5 py-2 bg-slate-800 hover:bg-slate-700 border border-slate-600 rounded-lg text-xs font-semibold flex items-center gap-1.5 transition shadow hover:border-slate-400">
+          📄 导出处置记录单
+        </button>
+      </div>
+    </header>
+
+    <!-- 三幕剧答辩演练控制条 -->
+    <div class="bg-cyberCard border border-cyberBorder rounded-xl p-3 flex flex-wrap items-center justify-between gap-3 shadow">
+      <div class="flex items-center gap-2 text-xs font-semibold text-slate-300">
+        <span class="text-neonBlue font-mono text-sm">▶ 演示场景三幕剧控制台:</span>
+      </div>
+      <div class="flex flex-wrap gap-2.5">
+        <button 
+          @click="triggerAct('ACT_1_NORMAL')"
+          :class="currentAct === 'ACT_1_NORMAL' ? 'bg-emerald-600 text-white shadow-emerald-600/30 shadow-md ring-2 ring-emerald-400' : 'bg-slate-800 text-slate-300 hover:bg-slate-700'"
+          class="px-3.5 py-1.5 rounded-lg text-xs font-medium transition flex items-center gap-1.5">
+          🟢 第一幕：常态安全巡检
+        </button>
+        <button 
+          @click="triggerAct('ACT_2_FIRE')"
+          :class="currentAct === 'ACT_2_FIRE' ? 'bg-rose-600 text-white shadow-rose-600/30 shadow-md ring-2 ring-rose-400 animate-pulse' : 'bg-slate-800 text-slate-300 hover:bg-rose-950/50'"
+          class="px-3.5 py-1.5 rounded-lg text-xs font-medium transition flex items-center gap-1.5">
+          🔥 第二幕：突发火情告警 (东主楼梯断流)
+        </button>
+        <button 
+          @click="triggerAct('ACT_3_BLOCKAGE')"
+          :class="currentAct === 'ACT_3_BLOCKAGE' ? 'bg-amber-600 text-white shadow-amber-600/30 shadow-md ring-2 ring-amber-400' : 'bg-slate-800 text-slate-300 hover:bg-amber-950/50'"
+          class="px-3.5 py-1.5 rounded-lg text-xs font-medium transition flex items-center gap-1.5">
+          🚧 第三幕：次生阻断重规划 (脚手架坍塌)
+        </button>
+        <button 
+          @click="triggerAct('ACT_1_NORMAL')"
+          class="px-3 py-1.5 bg-slate-900 border border-slate-700 hover:bg-slate-800 text-slate-400 rounded-lg text-xs transition">
+          ↺ 重置状态
+        </button>
+      </div>
+    </div>
+
+    <!-- 主展示区域：三栏布局 -->
+    <div class="flex-1 grid grid-cols-1 lg:grid-cols-12 gap-3 min-h-[620px]">
+
+      <!-- 左侧：工友个性化调度与终端状态 (3列) -->
+      <div class="lg:col-span-3 flex flex-col gap-3">
+        <!-- 工友终端状态 -->
+        <div class="bg-cyberCard border border-cyberBorder rounded-xl p-3.5 flex-1 flex flex-col shadow">
+          <div class="flex items-center justify-between pb-2 border-b border-cyberBorder mb-3">
+            <h2 class="text-sm font-bold text-slate-200 flex items-center gap-2">
+              👷 现场工友动态终端调度
+            </h2>
+            <span class="text-xs px-2 py-0.5 rounded bg-slate-800 text-slate-400 font-mono">
+              {{ workers.length }} 人在线
+            </span>
+          </div>
+
+          <div class="flex-1 overflow-y-auto space-y-2.5 pr-1">
+            <div 
+              v-for="w in workers" 
+              :key="w.id"
+              class="bg-slate-900/90 border rounded-lg p-3 transition"
+              :class="getWorkerCardBorder(w.id)">
+              <div class="flex justify-between items-start mb-1.5">
+                <div>
+                  <div class="font-bold text-sm text-white flex items-center gap-1.5">
+                    {{ w.name }}
+                    <span class="text-xs px-1.5 py-0.2 rounded bg-slate-800 text-slate-400 font-normal">
+                      {{ w.role }}
+                    </span>
+                  </div>
+                  <div class="text-[11px] text-slate-400">{{ w.device }}</div>
+                </div>
+                <div class="text-right">
+                  <span class="text-xs font-mono font-bold" :class="w.status === 'normal' ? 'text-neonGreen' : 'text-neonRed'">
+                    ❤️ {{ w.heart_rate }} bpm
+                  </span>
+                </div>
+              </div>
+
+              <!-- 逃生引导目标与路径 -->
+              <div class="bg-slate-950/70 rounded p-2 text-xs border border-slate-800 mb-2">
+                <div class="flex justify-between text-slate-400 mb-1">
+                  <span>目标出口:</span>
+                  <span class="text-neonBlue font-semibold">{{ getWorkerRoute(w.id)?.exit_name || '计算中...' }}</span>
+                </div>
+                <div class="flex justify-between text-slate-400">
+                  <span>预计疏散距离:</span>
+                  <span class="text-amber-300 font-mono">{{ getWorkerRoute(w.id)?.distance_m }} 米 (约 {{ getWorkerRoute(w.id)?.est_time_sec }} 秒)</span>
+                </div>
+              </div>
+
+              <!-- 智能安全帽播报模拟 -->
+              <div class="text-[11px] bg-slate-800/80 rounded p-1.5 text-slate-300 border-l-2" :class="currentAct === 'ACT_1_NORMAL' ? 'border-neonGreen' : 'border-rose-500'">
+                <div class="flex items-center gap-1 text-slate-400 font-semibold mb-0.5">
+                  <span>📢 安全帽语音广播:</span>
+                  <button @click="speakInstruction(getWorkerBroadcast(w.id)?.audio_script)" class="text-neonBlue hover:underline text-[10px]">
+                    🔊 试听播报
+                  </button>
+                </div>
+                <p class="leading-relaxed">{{ getWorkerBroadcast(w.id)?.audio_script }}</p>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- 施工消防规范审查指示牌 -->
+        <div class="bg-cyberCard border border-cyberBorder rounded-xl p-3 shadow text-xs">
+          <div class="flex items-center justify-between mb-2">
+            <span class="font-bold text-slate-200">⚖️ GB/T 50720 规范审查</span>
+            <span class="px-2 py-0.5 rounded text-[10px] font-bold" :class="compliance?.compliance_status === 'COMPLIANT' ? 'bg-emerald-900/60 text-emerald-300 border border-emerald-600' : 'bg-rose-900/60 text-rose-300 border border-rose-600'">
+              {{ compliance?.compliance_status || 'AUDITING' }}
+            </span>
+          </div>
+          <div class="text-slate-400 space-y-1">
+            <div class="flex justify-between">
+              <span>双出口分流原则 (GB 50016):</span>
+              <span class="font-semibold text-slate-200">{{ compliance?.dual_exit_compliant ? '✅ 满足' : '⚠️ 单侧汇流' }}</span>
+            </div>
+            <div class="flex justify-between">
+              <span>最大疏散距离:</span>
+              <span class="font-mono text-amber-300">{{ compliance?.max_evac_distance_m }}m</span>
+            </div>
+            <div class="text-[11px] text-slate-400 border-t border-slate-800 pt-1.5 mt-1">
+              <span class="text-slate-500">审计附注:</span> {{ compliance?.audit_notes?.[0] }}
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- 中间：2D 施工现场态势与逃生路线高拟真画板 (6列) -->
+      <div class="lg:col-span-6 bg-cyberCard border border-cyberBorder rounded-xl p-3.5 flex flex-col shadow relative overflow-hidden">
+        <div class="flex justify-between items-center mb-2 pb-2 border-b border-cyberBorder">
+          <div>
+            <h2 class="text-sm font-bold text-white flex items-center gap-2">
+              🗺️ 3F 结构主体施工作业层 2D 实时拓扑态势图
+            </h2>
+            <p class="text-xs text-slate-400">
+              绿色虚线：规划安全通道 | 红色波纹：明火/高危隔离区 | 橘黄色：烟气弥漫区
+            </p>
+          </div>
+          <div class="flex items-center gap-2 text-xs">
+            <span class="flex items-center gap-1 text-emerald-400"><span class="w-2.5 h-2.5 rounded-full bg-emerald-400"></span>安全</span>
+            <span class="flex items-center gap-1 text-rose-400"><span class="w-2.5 h-2.5 rounded-full bg-rose-500 animate-ping"></span>火险</span>
+            <span class="flex items-center gap-1 text-amber-400"><span class="w-2.5 h-2.5 rounded-full bg-amber-400"></span>烟雾/占道</span>
+          </div>
+        </div>
+
+        <!-- 施工图 SVG 交互视口 -->
+        <div class="flex-1 bg-slate-950 border border-slate-800 rounded-lg relative overflow-hidden flex items-center justify-center p-2 min-h-[460px]">
+          <svg class="w-full h-full max-h-[560px]" viewBox="0 0 850 560">
+            <!-- 背景网格 -->
+            <defs>
+              <pattern id="grid" width="40" height="40" patternUnits="userSpaceOnUse">
+                <path d="M 40 0 L 0 0 0 40" fill="none" stroke="#1e293b" stroke-width="0.8" />
+              </pattern>
+              <!-- 逃生流向动画标志 -->
+              <marker id="arrow-green" viewBox="0 0 10 10" refX="6" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+                <path d="M 0 1 L 10 5 L 0 9 z" fill="#10b981" />
+              </marker>
+              <marker id="arrow-blue" viewBox="0 0 10 10" refX="6" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+                <path d="M 0 1 L 10 5 L 0 9 z" fill="#38bdf8" />
+              </marker>
+            </defs>
+            <rect width="100%" height="100%" fill="url(#grid)" />
+
+            <!-- 绘制建筑结构外框 -->
+            <rect x="50" y="50" width="750" height="460" rx="12" fill="none" stroke="#334155" stroke-width="3" stroke-dasharray="8 4" />
+            <text x="70" y="75" fill="#64748b" font-size="12" font-weight="bold">CSCI 模块化建筑 3F 结构平面范围</text>
+
+            <!-- 绘制连接通道 (Edges) -->
+            <g v-for="e in edges" :key="e.id">
+              <line 
+                :x1="getNode(e.from)?.coords.x" 
+                :y1="getNode(e.from)?.coords.y" 
+                :x2="getNode(e.to)?.coords.x" 
+                :y2="getNode(e.to)?.coords.y" 
+                :stroke="getEdgeStroke(e)" 
+                :stroke-width="getEdgeWidth(e)"
+                :stroke-dasharray="e.is_blocked ? '6 6' : 'none'"
+                stroke-linecap="round"
+              />
+              <!-- 若通道上有阻断标记 -->
+              <g v-if="e.is_blocked" :transform="`translate(${(getNode(e.from)?.coords.x + getNode(e.to)?.coords.x)/2 - 12}, ${(getNode(e.from)?.coords.y + getNode(e.to)?.coords.y)/2 - 12})`">
+                <circle cx="12" cy="12" r="14" fill="#7f1d1d" stroke="#ef4444" stroke-width="2"/>
+                <text x="12" y="16" fill="white" font-size="12" text-anchor="middle" font-weight="bold">✕</text>
+              </g>
+            </g>
+
+            <!-- 绘制高亮逃生动态导引线 (Active Worker Routes) -->
+            <g v-for="r in routes" :key="'route-' + r.worker_id">
+              <polyline 
+                v-if="r.path && r.path.length > 1"
+                :points="getPolylinePoints(r.path)"
+                fill="none"
+                :stroke="getRouteColor(r.worker_id)"
+                stroke-width="5"
+                stroke-dasharray="10 8"
+                class="pulse-route"
+                marker-end="url(#arrow-green)"
+              />
+            </g>
+
+            <!-- 绘制特殊风险元素 (明火与烟雾特效) -->
+            <g v-if="currentAct === 'ACT_2_FIRE' || currentAct === 'ACT_3_BLOCKAGE'">
+              <!-- 火源核心区 -->
+              <circle cx="580" cy="140" r="38" fill="rgba(239, 68, 68, 0.35)" class="fire-flame" />
+              <circle cx="580" cy="140" r="22" fill="rgba(245, 158, 11, 0.7)" />
+              <text x="580" y="148" text-anchor="middle" font-size="24">🔥</text>
+              <text x="580" y="195" text-anchor="middle" fill="#f87171" font-size="12" font-weight="black">火源中心 (配电箱短路)</text>
+
+              <!-- 烟雾扩散区域 -->
+              <ellipse cx="670" cy="190" rx="65" ry="45" fill="rgba(148, 163, 184, 0.45)" filter="blur(4px)" />
+              <text x="670" y="195" text-anchor="middle" fill="#e2e8f0" font-size="11" font-weight="bold">扩散浓烟区</text>
+            </g>
+
+            <!-- 绘制拓扑节点 (Nodes) -->
+            <g v-for="n in nodes" :key="n.id" :transform="`translate(${n.coords.x}, ${n.coords.y})`">
+              <!-- 节点底圈 -->
+              <circle 
+                r="18" 
+                :fill="getNodeColor(n)" 
+                :stroke="getNodeBorder(n)" 
+                stroke-width="3"
+                class="transition-all"
+              />
+              <!-- 节点图标 -->
+              <text y="5" text-anchor="middle" font-size="14">
+                {{ getNodeIcon(n) }}
+              </text>
+              <!-- 节点标签 -->
+              <text y="32" text-anchor="middle" fill="#cbd5e1" font-size="11" font-weight="bold">
+                {{ n.name }}
+              </text>
+            </g>
+
+            <!-- 绘制实时工友位置标记 (Worker Pins) -->
+            <g v-for="w in workers" :key="'pin-' + w.id">
+              <g v-if="getNode(w.current_node)" :transform="`translate(${getNode(w.current_node).coords.x + getWorkerOffset(w.id).x}, ${getNode(w.current_node).coords.y + getWorkerOffset(w.id).y})`">
+                <circle r="12" fill="#0284c7" stroke="#38bdf8" stroke-width="2" class="animate-bounce" />
+                <text y="4" text-anchor="middle" fill="white" font-size="9" font-weight="bold">{{ w.id }}</text>
+              </g>
+            </g>
+          </svg>
+
+          <!-- 画布内悬浮态势胶囊 -->
+          <div class="absolute bottom-3 left-3 bg-slate-900/90 border border-slate-700/80 rounded-lg p-2.5 text-[11px] backdrop-blur flex items-center gap-3">
+            <div>
+              <span class="text-slate-400">已避险出口:</span>
+              <span class="text-emerald-400 font-bold ml-1">
+                {{ currentAct === 'ACT_1_NORMAL' ? '出口A (东) / 出口B (西)' : (currentAct === 'ACT_2_FIRE' ? '出口B (西) / 平台C (南)' : '避难平台C (南立面)') }}
+              </span>
+            </div>
+            <div class="border-l border-slate-700 pl-3">
+              <span class="text-slate-400">重规划时延:</span>
+              <span class="text-neonBlue font-mono font-bold ml-1">4.2 ms</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- 右侧：Qwen-VL 视觉感知流与智能体决策推演 (3列) -->
+      <div class="lg:col-span-3 flex flex-col gap-3">
+        <!-- Qwen-VL 视觉态势解析看板 -->
+        <div class="bg-cyberCard border border-cyberBorder rounded-xl p-3.5 shadow">
+          <div class="flex items-center justify-between pb-2 border-b border-cyberBorder mb-2.5">
+            <h2 class="text-sm font-bold text-slate-200 flex items-center gap-1.5">
+              👁️ Qwen-VL 视觉感知分析
+            </h2>
+            <span class="text-[10px] px-2 py-0.5 rounded bg-amber-950/70 text-amber-300 border border-amber-800/80 font-mono">
+              {{ perception?.source || '官方 API 联机' }}
+            </span>
+          </div>
+
+          <div class="space-y-2 text-xs">
+            <div class="bg-slate-900 p-2 rounded border border-slate-800 flex justify-between items-center">
+              <span class="text-slate-400">明火检出:</span>
+              <span :class="perception?.fire_detected ? 'text-rose-400 font-bold animate-pulse' : 'text-emerald-400 font-bold'">
+                {{ perception?.fire_detected ? '🔥 确认为明火蔓延' : '未见明火' }}
+              </span>
+            </div>
+            <div class="bg-slate-900 p-2 rounded border border-slate-800 flex justify-between items-center">
+              <span class="text-slate-400">浓烟态势:</span>
+              <span :class="perception?.smoke_detected ? 'text-amber-400 font-bold' : 'text-emerald-400 font-bold'">
+                {{ perception?.smoke_detected ? '☁️ 浓烟遮蔽走廊' : '空气质量良好' }}
+              </span>
+            </div>
+            
+            <div class="bg-slate-950 p-2.5 rounded border border-slate-800/80">
+              <div class="text-[11px] text-neonBlue font-semibold mb-1">📝 智能体态势认知简报:</div>
+              <p class="text-slate-300 text-[11px] leading-relaxed">
+                {{ perception?.agent_perception_summary || '系统运行平稳，施工现场环境正常。' }}
+              </p>
+            </div>
+          </div>
+        </div>
+
+        <!-- 智能体思考与 ReAct 决策日志流 -->
+        <div class="bg-cyberCard border border-cyberBorder rounded-xl p-3.5 flex-1 flex flex-col shadow">
+          <div class="flex items-center justify-between pb-2 border-b border-cyberBorder mb-2.5">
+            <h2 class="text-sm font-bold text-slate-200 flex items-center gap-1.5">
+              🧠 Agent 决策推演与调度日志
+            </h2>
+            <span class="w-2 h-2 rounded-full bg-neonGreen animate-ping"></span>
+          </div>
+
+          <div class="flex-1 overflow-y-auto space-y-2 pr-1 font-mono text-[11px]">
+            <div 
+              v-for="(log, idx) in logs" 
+              :key="idx" 
+              class="p-2 rounded bg-slate-900/80 border border-slate-800">
+              <div class="flex justify-between text-[10px] text-slate-500 mb-0.5">
+                <span>{{ log.timestamp }}</span>
+                <span class="text-neonBlue font-semibold">{{ log.event_type }}</span>
+              </div>
+              <div class="text-slate-300 leading-normal font-sans">
+                {{ log.message }}
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 弹窗：正式应急处置单 (Modal) -->
+    <div v-if="showReportModal" class="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+      <div class="bg-slate-900 border border-slate-700 rounded-2xl max-w-3xl w-full p-6 shadow-2xl overflow-y-auto max-h-[85vh] text-slate-200">
+        <div class="flex justify-between items-center pb-4 border-b border-slate-700">
+          <div>
+            <h3 class="text-lg font-bold text-white">{{ reportData?.report_title || '施工现场火灾应急处置记录单' }}</h3>
+            <p class="text-xs text-slate-400 font-mono">报告编号: {{ reportData?.report_id }} · 生成时间: {{ reportData?.generated_at }}</p>
+          </div>
+          <button @click="showReportModal = false" class="text-slate-400 hover:text-white text-xl font-bold">✕</button>
+        </div>
+
+        <div class="mt-4 space-y-4 text-xs">
+          <div class="bg-slate-950 p-3 rounded-lg border border-slate-800 grid grid-cols-2 gap-2">
+            <div><strong>工程名称:</strong> {{ reportData?.project_meta?.project_name }}</div>
+            <div><strong>作业层:</strong> {{ reportData?.project_meta?.floor_level }}</div>
+            <div><strong>依据标准:</strong> {{ reportData?.project_meta?.standard_applied }}</div>
+            <div><strong>当前处置态势:</strong> {{ reportData?.current_scenario_state }}</div>
+          </div>
+
+          <div>
+            <h4 class="font-bold text-neonBlue mb-2">一、人员安全疏散清单与流向</h4>
+            <table class="w-full text-left border border-slate-800">
+              <thead class="bg-slate-800 text-slate-400">
+                <tr>
+                  <th class="p-2">工号</th>
+                  <th class="p-2">姓名</th>
+                  <th class="p-2">工种</th>
+                  <th class="p-2">逃生目标出口</th>
+                  <th class="p-2">距离</th>
+                  <th class="p-2">预计耗时</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr v-for="r in reportData?.detailed_personnel_manifest" :key="r.worker_id" class="border-t border-slate-800">
+                  <td class="p-2 font-mono">{{ r.worker_id }}</td>
+                  <td class="p-2 font-bold">{{ r.worker_name }}</td>
+                  <td class="p-2">{{ r.worker_role }}</td>
+                  <td class="p-2 text-emerald-400 font-semibold">{{ r.exit_name }}</td>
+                  <td class="p-2 font-mono">{{ r.distance_m }}m</td>
+                  <td class="p-2 font-mono">{{ r.est_time_sec }}s</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+
+          <div>
+            <h4 class="font-bold text-neonBlue mb-1">二、GB/T 50720 合规审计评定</h4>
+            <div class="bg-slate-950 p-3 rounded-lg border border-slate-800">
+              <p><strong>双出口分流评定:</strong> {{ reportData?.standards_compliance_audit?.dual_exit_compliant ? '合规 (未形成单点堵塞)' : '预警 (单侧重度拥挤)' }}</p>
+              <p><strong>合规审计摘要:</strong> {{ reportData?.standards_compliance_audit?.audit_notes?.join('; ') }}</p>
+            </div>
+          </div>
+        </div>
+
+        <div class="mt-6 flex justify-end gap-3 pt-3 border-t border-slate-800">
+          <button @click="window.print()" class="px-4 py-2 bg-emerald-600 hover:bg-emerald-500 text-white rounded-lg text-xs font-semibold">
+            🖨️ 打印/保存为 PDF
+          </button>
+          <button @click="showReportModal = false" class="px-4 py-2 bg-slate-800 hover:bg-slate-700 text-slate-300 rounded-lg text-xs">
+            关闭
+          </button>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- Vue 3 前端业务逻辑 -->
+  <script>
+    const { createApp, ref, computed, onMounted } = Vue;
+
+    createApp({
+      setup() {
+        const currentAct = ref('ACT_1_NORMAL');
+        const nodes = ref([]);
+        const edges = ref([]);
+        const workers = ref([]);
+        const routes = ref([]);
+        const broadcasts = ref([]);
+        const perception = ref({});
+        const compliance = ref({});
+        const logs = ref([]);
+        const showReportModal = ref(false);
+        const reportData = ref(null);
+
+        const actTitle = computed(() => {
+          switch(currentAct.value) {
+            case 'ACT_1_NORMAL': return '🟢 常态日常巡检合规';
+            case 'ACT_2_FIRE': return '🔥 突发火灾动态疏散响应';
+            case 'ACT_3_BLOCKAGE': return '🚧 通道阻断二次重规划';
+            default: return '态势未知';
+          }
+        });
+
+        const actBadgeClass = computed(() => {
+          switch(currentAct.value) {
+            case 'ACT_1_NORMAL': return 'text-neonGreen';
+            case 'ACT_2_FIRE': return 'text-neonRed animate-pulse';
+            case 'ACT_3_BLOCKAGE': return 'text-neonAmber';
+            default: return 'text-slate-400';
+          }
+        });
+
+        // 获取全量大屏态势
+        const fetchState = async () => {
+          try {
+            const res = await fetch('/api/state');
+            const data = await res.json();
+            currentAct.value = data.current_act;
+            nodes.value = data.nodes || [];
+            edges.value = data.edges || [];
+            workers.value = data.workers || [];
+            routes.value = data.plan?.routes || [];
+            compliance.value = data.plan?.compliance_audit || {};
+            perception.value = data.perception || {};
+            broadcasts.value = data.broadcasts || [];
+            logs.value = data.incident_log || [];
+          } catch (e) {
+            console.error('获取态势失败:', e);
+          }
+        };
+
+        // 触发三幕剧情景
+        const triggerAct = async (actKey) => {
+          try {
+            const res = await fetch('/api/trigger', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({ act_key: actKey })
+            });
+            await fetchState();
+          } catch (e) {
+            console.error('切换场景失败:', e);
+          }
+        };
+
+        // 获取导出报告
+        const fetchReport = async () => {
+          try {
+            const res = await fetch('/api/report');
+            reportData.value = await res.json();
+          } catch (e) {
+            console.error('获取报告失败:', e);
+          }
+        };
+
+        // 语音播报模拟（使用浏览器的 Web Speech API）
+        const speakInstruction = (text) => {
+          if ('speechSynthesis' in window && text) {
+            window.speechSynthesis.cancel();
+            const utterance = new SpeechSynthesisUtterance(text);
+            utterance.lang = 'zh-CN';
+            utterance.rate = 1.05;
+            window.speechSynthesis.speak(utterance);
+          }
+        };
+
+        // 画布辅助函数
+        const getNode = (id) => nodes.value.find(n => n.id === id);
+
+        const getNodeColor = (n) => {
+          if (n.zone_type === 'safe_exit' || n.zone_type === 'refuge_platform') return '#064e3b';
+          if (n.hazard_level === 'critical') return '#450a0a';
+          if (n.hazard_level === 'high') return '#431407';
+          return '#1e293b';
+        };
+
+        const getNodeBorder = (n) => {
+          if (n.zone_type === 'safe_exit' || n.zone_type === 'refuge_platform') return '#10b981';
+          if (n.hazard_level === 'critical') return '#ef4444';
+          if (n.hazard_level === 'high') return '#f97316';
+          return '#475569';
+        };
+
+        const getNodeIcon = (n) => {
+          if (n.zone_type === 'safe_exit') return '🚪';
+          if (n.zone_type === 'refuge_platform') return '🛟';
+          if (n.id === 'N_WOOD') return '🪵';
+          if (n.id === 'N_REBAR') return '🏗️';
+          if (n.id === 'N_CORE_TUBE') return '🏢';
+          if (n.id === 'N_PAINT_STORE') return '🛢️';
+          return '📍';
+        };
+
+        const getEdgeStroke = (e) => {
+          if (e.is_blocked) return '#7f1d1d';
+          if (e.risk_fire > 0.5) return '#ef4444';
+          if (e.risk_smoke > 0.3) return '#f59e0b';
+          return '#334155';
+        };
+
+        const getEdgeWidth = (e) => {
+          if (e.risk_fire > 0.5) return 4;
+          return 2.5;
+        };
+
+        const getPolylinePoints = (path) => {
+          if (!path) return '';
+          return path.map(nid => {
+            const n = getNode(nid);
+            return n ? `${n.coords.x},${n.coords.y}` : '';
+          }).filter(Boolean).join(' ');
+        };
+
+        const getRouteColor = (workerId) => {
+          const colors = {
+            'W01': '#10b981',
+            'W02': '#38bdf8',
+            'W03': '#a855f7',
+            'W04': '#f59e0b'
+          };
+          return colors[workerId] || '#10b981';
+        };
+
+        const getWorkerOffset = (workerId) => {
+          const offsets = {
+            'W01': { x: -8, y: -8 },
+            'W02': { x: 8, y: -8 },
+            'W03': { x: -8, y: 8 },
+            'W04': { x: 8, y: 8 }
+          };
+          return offsets[workerId] || { x: 0, y: 0 };
+        };
+
+        const getWorkerRoute = (wid) => routes.value.find(r => r.worker_id === wid);
+        const getWorkerBroadcast = (wid) => broadcasts.value.find(b => b.worker_id === wid);
+
+        const getWorkerCardBorder = (wid) => {
+          const r = getWorkerRoute(wid);
+          if (r?.status === 'ROUTE_READY') return 'border-slate-800 hover:border-slate-700';
+          return 'border-rose-800 bg-rose-950/20';
+        };
+
+        onMounted(() => {
+          fetchState();
+        });
+
+        return {
+          currentAct,
+          nodes,
+          edges,
+          workers,
+          routes,
+          broadcasts,
+          perception,
+          compliance,
+          logs,
+          showReportModal,
+          reportData,
+          actTitle,
+          actBadgeClass,
+          fetchState,
+          triggerAct,
+          fetchReport,
+          speakInstruction,
+          getNode,
+          getNodeColor,
+          getNodeBorder,
+          getNodeIcon,
+          getEdgeStroke,
+          getEdgeWidth,
+          getPolylinePoints,
+          getRouteColor,
+          getWorkerOffset,
+          getWorkerRoute,
+          getWorkerBroadcast,
+          getWorkerCardBorder
+        };
+      }
+    }).mount('#app');
+  </script>
+</body>
+</html>
