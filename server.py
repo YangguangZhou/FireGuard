@@ -59,9 +59,11 @@ class FireGuardRequestHandler(SimpleHTTPRequestHandler):
         path = url.path
 
         if path in ("/", "/index.html"):
-            index_path = os.path.join(PROJECT_ROOT, "web_dashboard", "index.html")
-            if os.path.exists(index_path):
-                with open(index_path, "rb") as f:
+            dist_index = os.path.join(PROJECT_ROOT, "web_dashboard", "dist", "index.html")
+            legacy_index = os.path.join(PROJECT_ROOT, "web_dashboard", "index.html")
+            target_index = dist_index if os.path.exists(dist_index) else legacy_index
+            if os.path.exists(target_index):
+                with open(target_index, "rb") as f:
                     content = f.read()
                 self.send_response(HTTPStatus.OK)
                 self.send_header("Content-Type", "text/html; charset=utf-8")
@@ -101,18 +103,24 @@ class FireGuardRequestHandler(SimpleHTTPRequestHandler):
             self._send_json(report)
             return
 
-        # 静态文件映射
-        static_file = os.path.join(PROJECT_ROOT, "web_dashboard", path.lstrip("/"))
-        if os.path.isfile(static_file):
-            mime_type, _ = mimetypes.guess_type(static_file)
-            with open(static_file, "rb") as f:
-                content = f.read()
-            self.send_response(HTTPStatus.OK)
-            self.send_header("Content-Type", mime_type or "application/octet-stream")
-            self.send_header("Content-Length", str(len(content)))
-            self.end_headers()
-            self.wfile.write(content)
-            return
+        # 静态文件双层寻址映射：先查 dist，再查原始 web_dashboard 资产
+        rel_path = path.lstrip("/")
+        candidate_paths = [
+            os.path.join(PROJECT_ROOT, "web_dashboard", "dist", rel_path),
+            os.path.join(PROJECT_ROOT, "web_dashboard", rel_path)
+        ]
+
+        for static_file in candidate_paths:
+            if os.path.isfile(static_file):
+                mime_type, _ = mimetypes.guess_type(static_file)
+                with open(static_file, "rb") as f:
+                    content = f.read()
+                self.send_response(HTTPStatus.OK)
+                self.send_header("Content-Type", mime_type or "application/octet-stream")
+                self.send_header("Content-Length", str(len(content)))
+                self.end_headers()
+                self.wfile.write(content)
+                return
 
         self.send_error(HTTPStatus.NOT_FOUND, "Not Found")
 
