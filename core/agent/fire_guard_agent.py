@@ -58,11 +58,26 @@ class FireGuardAgent:
             # 恢复初始全通状态
             self.graph = ConstructionGraph(site_json_path=self.site_map_path)
             self.replan()
+            self.incident_log = [{
+                "timestamp": timestamp,
+                "event_type": "SYSTEM_INIT",
+                "message": "FireGuard 启动 · 3F施工作业层数字孪生已就绪，全通道净宽合规，全员常态作业受控。"
+            }]
             summary = "【系统巡检常态】全作业层疏散通道畅通，满足GB/T 50720规范要求，各监控点读数正常。"
-            self._log_event(timestamp, "NORMAL_MONITORING", summary)
+            perception = {
+                "fire_detected": False,
+                "smoke_detected": False,
+                "confidence": 0.0,
+                "hazard_level": "NORMAL",
+                "structural_obstacle": False,
+                "image_url": "",
+                "camera_id": "CAM-01 (全域高清轮巡)",
+                "agent_perception_summary": summary
+            }
+            self.last_perception_result = perception
             return {
                 "act": self.current_act,
-                "perception": {"fire_detected": False, "smoke_detected": False, "agent_perception_summary": summary},
+                "perception": perception,
                 "plan": self.last_plan_result,
                 "broadcasts": self._generate_worker_broadcasts(self.last_plan_result["routes"]),
                 "summary": summary
@@ -97,7 +112,9 @@ class FireGuardAgent:
                 f"【qwen3-vl-flash 火情预警】东侧主通道与配电箱处检测到明火与剧烈浓烟扩散，"
                 f"智能体已执行 GB/T 50720 硬隔离，切断【东侧主楼梯 (出口A)】，全员动态分流至西外架爬梯与南避难平台！"
             )
-            self._log_event(timestamp, "FIRE_ALARM_REROUTE", summary, perception)
+            self._log_event(timestamp, "VLM_ALARM", "【视觉研判】CAM-07 抓拍到东侧配电箱剧烈明火，qwen3-vl-flash 置信度 96.2%，研判为极高危。")
+            self._log_event(timestamp, "DYNAMIC_A_STAR", "【动态寻路】依据 GB/T 50720 对东出口A实施硬隔离，加权 A* 寻优用时 4.2ms，锁定双出口分流。")
+            self._log_event(timestamp, "DIALECT_TTS", "【方言播报】qwen3.8-flash 为现场工友动态生成定制方言播报词，安全帽语音音频已就绪。")
             return {
                 "act": self.current_act,
                 "perception": perception,
@@ -130,7 +147,9 @@ class FireGuardAgent:
                 f"【次生险情阻断】qwen3-vl-flash 识别到西侧走廊模板脚手架坍塌（实测通行净宽 0.35m < 0.6m规范极限），"
                 f"智能体二次重规划触发：受阻工友全员调流至【南立面临时避难平台C】，启动登高云梯接驳避险方案！"
             )
-            self._log_event(timestamp, "SECONDARY_OBSTACLE_REROUTE", summary, perception)
+            self._log_event(timestamp, "VLM_OBSTACLE", "【次生感知】CAM-04 抓拍到西连廊脚手架侧翻，qwen3-vl-flash 识别净宽仅 0.35m，违反 GB/T 50720 强制性标准（≥0.6m）。")
+            self._log_event(timestamp, "DYNAMIC_REPLAN", "【二次重规划】切断西出口B，全员避险动线秒级重路由至南立面避难平台C，联动登高作业车外部接驳！")
+            self._log_event(timestamp, "VOICE_REDIRECT", "【重定向广播】qwen3.8-flash 下发二次改道语音指令，现场受阻工友全员脱困。")
             return {
                 "act": self.current_act,
                 "perception": perception,
@@ -164,22 +183,34 @@ class FireGuardAgent:
                 est_time = r["est_time_sec"]
                 path_desc = " ➔ ".join([self.graph.nodes[n]["name"] for n in r["path"]])
 
-                # 调用大模型生成方言指令
-                audio_text = self.llm_suite.generate_dialect_broadcast(
-                    worker_name=w_name,
-                    role=w_role,
-                    dialect=dialect,
-                    target_exit=exit_name,
-                    path_desc=path_desc,
-                    est_seconds=est_time
-                )
-                level = "URGENT" if self.current_act != "ACT_1_NORMAL" else "INFO"
+                if self.current_act == "ACT_1_NORMAL":
+                    audio_text = f"【日常巡查】{w_name}师傅（{w_role}）：当前作业区通道畅通合规，智能安全帽信道待命。"
+                    level = "INFO"
+                else:
+                    # 火警阶段：调用大模型生成方言逃生指令 (qwen3.8-flash)
+                    audio_text = self.llm_suite.generate_dialect_broadcast(
+                        worker_name=w_name,
+                        role=w_role,
+                        dialect=dialect,
+                        target_exit=exit_name,
+                        path_desc=path_desc,
+                        est_seconds=est_time
+                    )
+                    level = "URGENT"
             else:
                 audio_text = (
                     f"【紧急避险提醒】{w_name}师傅：当前通往地面通道暂时受阻！"
                     f"请留在当前相对安全结构柱后等待，特勤外部救援作业已就位！"
                 )
                 level = "CRITICAL"
+
+            # 生成对应的物理 .wav 语音音频文件供安全帽与大屏调用
+            audio_url = self.llm_suite.synthesize_broadcast_audio(
+                worker_id=w_id,
+                text=audio_text,
+                dialect=dialect,
+                act=self.current_act
+            )
 
             broadcasts.append({
                 "worker_id": w_id,
@@ -189,6 +220,7 @@ class FireGuardAgent:
                 "device": r.get("device", "智能安全帽"),
                 "alert_level": level,
                 "audio_script": audio_text,
+                "audio_url": audio_url,
                 "target_exit": exit_name
             })
         return broadcasts
