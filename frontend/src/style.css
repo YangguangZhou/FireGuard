@@ -2,6 +2,15 @@
 @tailwind components;
 @tailwind utilities;
 
+html { background: #050914; }
+body { margin: 0; min-width: 360px; background: #050914; }
+.app-shell {
+  background:
+    radial-gradient(ellipse at 50% -18%, rgba(14, 116, 144, .18), transparent 48%),
+    radial-gradient(ellipse at 100% 42%, rgba(30, 64, 175, .10), transparent 35%),
+    #050914;
+}
+
 /* 自定义暗黑科技大屏滚动条 */
 ::-webkit-scrollbar {
   width: 5px;

@@ -1,15 +1,15 @@
 <template>
-  <div class="min-h-screen bg-cyberBg text-slate-100 flex flex-col font-tech selection:bg-cyan-500 selection:text-slate-950">
+  <div class="app-shell min-h-screen text-slate-100 flex flex-col font-tech selection:bg-cyan-500 selection:text-slate-950">
     <!-- 顶部统一导航栏 -->
     <TopNavbar />
 
     <!-- 主展示工作区 -->
-    <main class="flex-1 p-3 flex flex-col gap-3 max-w-[1920px] w-full mx-auto">
+    <main class="flex-1 p-4 md:p-5 flex flex-col gap-4 max-w-[1920px] w-full mx-auto">
       <!-- 演练推演顺序时间轴控制器 -->
       <DrillTimeline />
 
       <!-- 三栏响应式大屏网格系统 (3列 - 6列 - 3列) -->
-      <div class="flex-1 grid grid-cols-1 lg:grid-cols-12 gap-3 min-h-[660px]">
+      <div class="flex-1 grid grid-cols-1 lg:grid-cols-12 gap-4 min-h-[660px]">
         <!-- 左侧栏：现场工友调度与规范审查 (3列) -->
         <div class="lg:col-span-3 flex flex-col gap-3">
           <WorkerDispatchPanel class="flex-1" />

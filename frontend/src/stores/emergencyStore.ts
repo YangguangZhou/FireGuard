@@ -162,12 +162,18 @@ export const useEmergencyStore = defineStore('emergency', () => {
       isAutoDrillPlaying.value = false;
     } else {
       isAutoDrillPlaying.value = true;
-      jumpToStep(0);
+      if (currentDrillStep.value >= drillSteps.length - 1) {
+        void jumpToStep(0);
+      } else {
+        void jumpToStep(currentDrillStep.value);
+      }
       autoDrillTimer = setInterval(() => {
         if (currentDrillStep.value < drillSteps.length - 1) {
-          jumpToStep(currentDrillStep.value + 1);
+          void jumpToStep(currentDrillStep.value + 1);
         } else {
-          jumpToStep(0);
+          clearInterval(autoDrillTimer);
+          autoDrillTimer = null;
+          isAutoDrillPlaying.value = false;
         }
       }, 9500);
     }
