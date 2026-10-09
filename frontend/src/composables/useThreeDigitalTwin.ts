@@ -211,7 +211,7 @@ export function useThreeDigitalTwin() {
     fireMeshGroup.add(dangerRing);
 
     // 火焰顶部立体警告牌
-    const fireLabel = createTextSprite('🔥 火源中心 (配电箱短路)', 'rgba(239, 68, 68, 0.92)', '#ffffff', '#fca5a5');
+    const fireLabel = createTextSprite('火源中心 · 配电箱短路', 'rgba(239, 68, 68, 0.92)', '#ffffff', '#fca5a5');
     fireLabel.position.set(fireP.x, 65, fireP.z);
     fireMeshGroup.add(fireLabel);
 
@@ -444,7 +444,7 @@ export function useThreeDigitalTwin() {
         new THREE.MeshBasicMaterial({ color: 0xef4444, transparent: true, opacity: 0.75 })
       );
       blockWall.position.set(eastBlockP.x, 15, eastBlockP.z);
-      const blockLabel = createTextSprite('⛔ 东侧大火封锁', 'rgba(239, 68, 68, 0.95)', '#ffffff', '#ffffff');
+      const blockLabel = createTextSprite('东侧火情封锁', 'rgba(239, 68, 68, 0.95)', '#ffffff', '#ffffff');
       blockLabel.scale.set(45, 11, 1);
       blockLabel.position.set(eastBlockP.x, 38, eastBlockP.z);
       pathTubesGroup.add(blockWall, blockLabel);
@@ -467,7 +467,7 @@ export function useThreeDigitalTwin() {
       pipe2.rotation.x = Math.PI / 4;
       pipe2.position.set(obsP.x + 25, 8, obsP.z - 15);
 
-      const obsLabel = createTextSprite('🚧 支架坍塌·净宽0.35m违规', 'rgba(249, 115, 22, 0.95)', '#ffffff', '#ffffff');
+      const obsLabel = createTextSprite('支架坍塌 · 净宽 0.35 m', 'rgba(249, 115, 22, 0.95)', '#ffffff', '#ffffff');
       obsLabel.scale.set(58, 14, 1);
       obsLabel.position.set(obsP.x + 20, 35, obsP.z - 20);
 

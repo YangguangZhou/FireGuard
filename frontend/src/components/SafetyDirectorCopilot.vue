@@ -3,7 +3,7 @@
     <!-- 标题 -->
     <div class="flex items-center justify-between pb-1.5 mb-2 border-b border-cyberBorder/60">
       <h2 class="text-xs font-bold text-slate-100 flex items-center gap-1.5">
-        <span>🤖</span>
+        <Bot :size="14" />
         <span>安全总监 Copilot (qwen-plus / qwen3.7-plus)</span>
       </h2>
       <span class="text-[9px] px-1.5 py-0.5 rounded bg-cyan-950/60 text-cyan-300 border border-cyan-800/60">
@@ -19,7 +19,7 @@
         @click="chatStore.sendMessage(qp.query)"
         class="px-2 py-0.5 rounded bg-slate-900/90 hover:bg-slate-800 border border-slate-800 hover:border-cyan-500/50 text-[10px] text-slate-400 hover:text-cyan-300 transition"
       >
-        💬 {{ qp.label }}
+        <MessageCircle class="inline-block mr-1" :size="11" />{{ qp.label }}
       </button>
     </div>
 
@@ -71,6 +71,7 @@
 
 <script setup lang="ts">
 import { ref, watch, nextTick } from 'vue';
+import { Bot, MessageCircle } from 'lucide-vue-next';
 import { useChatStore } from '@/stores/chatStore';
 
 const chatStore = useChatStore();

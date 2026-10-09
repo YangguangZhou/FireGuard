@@ -3,7 +3,7 @@
     <!-- 标题栏 -->
     <div class="flex items-center justify-between pb-1.5 mb-2 border-b border-cyberBorder/60">
       <h2 class="text-xs font-bold text-slate-100 flex items-center gap-1.5">
-        <span>📸</span>
+        <Camera :size="14" />
         <span>现场监控实时视频抓拍</span>
       </h2>
       <span class="text-[9px] px-1.5 py-0.5 rounded bg-slate-900 text-slate-400 font-mono border border-slate-800">
@@ -20,7 +20,7 @@
         class="w-full h-auto object-cover max-h-[160px] transition-all duration-500"
       />
       <div v-else class="text-center p-4 text-slate-500 text-xs">
-        <div class="text-2xl mb-1 opacity-60">📹</div>
+        <Camera class="mx-auto mb-1 opacity-60" :size="22" />
         <div class="text-[11px] text-slate-400">监控摄像头常态巡检中</div>
         <div class="text-[9px] text-slate-500 mt-0.5">全域各测点未检出异常明火或占道</div>
       </div>
@@ -30,7 +30,7 @@
         v-if="store.perception?.fire_detected"
         class="absolute top-2 left-2 bg-rose-600/95 text-white text-[9px] px-2 py-0.5 rounded font-mono font-bold shadow-glow-red animate-pulse flex items-center gap-1"
       >
-        <span>🔥</span>
+        <Flame :size="12" />
         <span>FLAME_DETECTED: 96.2%</span>
       </div>
 
@@ -38,7 +38,7 @@
         v-if="store.perception?.structural_obstacle"
         class="absolute top-2 left-2 bg-amber-600/95 text-white text-[9px] px-2 py-0.5 rounded font-mono font-bold shadow animate-pulse flex items-center gap-1"
       >
-        <span>⚠️</span>
+        <TriangleAlert :size="12" />
         <span>COLLAPSED_OBSTACLE: 94.0%</span>
       </div>
     </div>
@@ -47,7 +47,7 @@
     <div class="mt-2.5 bg-slate-950/90 p-2 rounded-lg border border-slate-800/80 text-[10px]">
       <div class="text-cyan-400 font-semibold mb-1 flex items-center justify-between">
         <span class="flex items-center gap-1">
-          <span>🧠</span>
+          <ScanEye :size="13" />
           <span>qwen3-vl-flash 研判:</span>
         </span>
         <span
@@ -66,6 +66,7 @@
 
 <script setup lang="ts">
 import { useEmergencyStore } from '@/stores/emergencyStore';
+import { Camera, Flame, TriangleAlert, ScanEye } from 'lucide-vue-next';
 
 const store = useEmergencyStore();
 

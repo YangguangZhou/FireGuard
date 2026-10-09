@@ -2,14 +2,21 @@
 @tailwind components;
 @tailwind utilities;
 
-html { background: #050914; }
-body { margin: 0; min-width: 360px; background: #050914; }
+html { background: #070b12; }
+body { margin: 0; min-width: 360px; background: #070b12; color: #e2e8f0; font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; }
 .app-shell {
   background:
-    radial-gradient(ellipse at 50% -18%, rgba(14, 116, 144, .18), transparent 48%),
-    radial-gradient(ellipse at 100% 42%, rgba(30, 64, 175, .10), transparent 35%),
-    #050914;
+    radial-gradient(ellipse at 52% -24%, rgba(14, 116, 144, .13), transparent 52%),
+    linear-gradient(180deg, #090f19 0%, #070b12 44%, #080c13 100%);
 }
+
+.bg-cyberPanelSoft {
+  background-color: rgba(13, 20, 31, .9);
+  background-image: linear-gradient(145deg, rgba(38, 64, 91, .14), transparent 52%);
+  box-shadow: 0 12px 32px rgba(0, 0, 0, .18), inset 0 1px 0 rgba(148, 163, 184, .035);
+}
+.border-cyberBorder { border-color: rgba(116, 145, 177, .16); }
+::selection { background: rgba(34, 211, 238, .28); color: #f8fafc; }
 
 /* 自定义暗黑科技大屏滚动条 */
 ::-webkit-scrollbar {

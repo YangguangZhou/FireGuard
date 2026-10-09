@@ -11,7 +11,7 @@
       </div>
       <div class="flex items-center gap-2">
         <button @click="store.toggleAutoDrill" :class="store.isAutoDrillPlaying ? 'border-rose-400/40 bg-rose-500/15 text-rose-200 hover:bg-rose-500/25' : 'border-cyan-400/30 bg-cyan-400 text-slate-950 hover:bg-cyan-300'" class="rounded-xl border px-4 py-2 text-xs font-bold shadow-lg transition">
-          {{ store.isAutoDrillPlaying ? 'Ⅱ  暂停演示' : '▶  自动播放' }}
+          <span class="inline-flex items-center gap-1.5"><Pause v-if="store.isAutoDrillPlaying" :size="13" /><Play v-else :size="13" />{{ store.isAutoDrillPlaying ? '暂停演示' : '自动播放' }}</span>
         </button>
         <button @click="store.resetAllToNormal" class="rounded-xl border border-slate-700 bg-slate-950/70 px-3 py-2 text-xs font-semibold text-slate-300 transition hover:border-slate-500 hover:text-white">重新开始</button>
       </div>
@@ -49,6 +49,7 @@
 
 <script setup lang="ts">
 import { useEmergencyStore } from '@/stores/emergencyStore';
+import { Pause, Play } from 'lucide-vue-next';
 
 const store = useEmergencyStore();
 const activeClasses = [

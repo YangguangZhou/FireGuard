@@ -3,7 +3,7 @@
     <!-- 左侧：中建国际赛事标识与系统标题 -->
     <div class="flex items-center gap-3">
       <div class="w-9 h-9 rounded-lg bg-gradient-to-br from-blue-600 via-indigo-600 to-cyan-500 flex items-center justify-center font-bold text-lg text-white shadow-glow-blue border border-cyan-400/30">
-        🛡️
+        <ShieldCheck :size="19" :stroke-width="1.8" />
       </div>
       <div>
         <div class="flex items-center gap-2">
@@ -43,7 +43,7 @@
       <button 
         @click="store.showReportModal = true; store.fetchReport()"
         class="px-3 py-1.5 bg-gradient-to-r from-slate-900 to-slate-800 hover:from-slate-800 hover:to-slate-700 border border-slate-700 hover:border-cyan-500/50 rounded-lg text-xs font-semibold text-slate-200 hover:text-white flex items-center gap-1.5 transition shadow">
-        <span>📄</span>
+        <FileText :size="14" />
         <span>应急处置记录单</span>
       </button>
     </div>
@@ -52,6 +52,7 @@
 
 <script setup lang="ts">
 import { ref, computed, onMounted, onUnmounted } from 'vue';
+import { ShieldCheck, FileText } from 'lucide-vue-next';
 import { useEmergencyStore } from '@/stores/emergencyStore';
 
 const store = useEmergencyStore();

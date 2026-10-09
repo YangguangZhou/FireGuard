@@ -3,7 +3,7 @@
     <!-- 面板标题 -->
     <div class="flex items-center justify-between pb-2 mb-2 border-b border-cyberBorder/60">
       <h2 class="text-xs font-bold text-slate-100 flex items-center gap-1.5">
-        <span>👷</span>
+        <Users :size="14" />
         <span>现场工友智能终端调度</span>
       </h2>
       <span class="text-[9px] px-1.5 py-0.5 rounded bg-blue-950/70 text-cyan-300 border border-cyan-800/60 font-mono">
@@ -41,7 +41,7 @@
               class="text-[11px] font-mono font-bold px-1.5 py-0.5 rounded"
               :class="w.status === 'normal' ? 'bg-emerald-950/50 text-emerald-400 border border-emerald-800/50' : 'bg-rose-950/50 text-rose-400 border border-rose-800/50 animate-pulse'"
             >
-              ❤️ {{ w.heart_rate }} bpm
+              <HeartPulse class="inline-block mr-1" :size="12" />{{ w.heart_rate }} bpm
             </span>
           </div>
         </div>
@@ -69,7 +69,7 @@
         >
           <div class="flex items-center justify-between text-slate-400 font-semibold mb-1">
             <span class="flex items-center gap-1">
-              <span>📢</span>
+              <AudioLines :size="12" />
               <span>骨传导语音指令:</span>
             </span>
 
@@ -80,7 +80,7 @@
               class="px-2 py-0.5 rounded bg-blue-900/70 hover:bg-blue-800 text-cyan-300 border border-cyan-500/40 text-[9px] flex items-center gap-1 shadow transition active:scale-95"
               :class="player.activeWorkerId.value === w.id && player.isPlaying.value ? 'animate-pulse ring-1 ring-cyan-400' : ''"
             >
-              <span>{{ player.activeWorkerId.value === w.id && player.isPlaying.value ? '🔊 播报中...' : '🔊 播放语音' }}</span>
+              <span><span class="flex items-center gap-1"><Volume2 :size="11" />{{ player.activeWorkerId.value === w.id && player.isPlaying.value ? '播报中' : '播放语音' }}</span></span>
             </button>
             <span v-else class="text-emerald-400 text-[9px]">常态待命</span>
           </div>
@@ -97,6 +97,7 @@
 <script setup lang="ts">
 import { useEmergencyStore } from '@/stores/emergencyStore';
 import { useAudioPlayer } from '@/composables/useAudioPlayer';
+import { Users, HeartPulse, AudioLines, Volume2 } from 'lucide-vue-next';
 
 const store = useEmergencyStore();
 const player = useAudioPlayer();

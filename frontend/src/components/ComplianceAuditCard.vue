@@ -2,7 +2,7 @@
   <div class="bg-cyberPanelSoft border border-cyberBorder rounded-xl p-3 flex flex-col shadow-glass">
     <div class="flex items-center justify-between pb-1.5 mb-2 border-b border-cyberBorder/60">
       <h2 class="text-xs font-bold text-slate-100 flex items-center gap-1.5">
-        <span>⚖️</span>
+        <Scale :size="14" />
         <span>GB/T 50720 施工消防合规审计</span>
       </h2>
       <span
@@ -17,7 +17,7 @@
       <div class="flex justify-between items-center bg-slate-950/60 px-2 py-1 rounded">
         <span>双出口分流 (GB 50016):</span>
         <span class="font-semibold text-white">
-          {{ store.compliance?.dual_exit_compliant ? '✅ 满足 (未形成单点汇流踩踏)' : '⚠️ 预警 (单侧重度拥挤)' }}
+          {{ store.compliance?.dual_exit_compliant ? '满足' : '预警' }}
         </span>
       </div>
 
@@ -38,6 +38,7 @@
 
 <script setup lang="ts">
 import { useEmergencyStore } from '@/stores/emergencyStore';
+import { Scale } from 'lucide-vue-next';
 
 const store = useEmergencyStore();
 </script>

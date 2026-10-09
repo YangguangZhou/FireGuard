@@ -2,7 +2,7 @@
   <div class="bg-cyberPanelSoft border border-cyberBorder rounded-xl p-3 flex flex-col shadow-glass flex-1 min-h-[160px]">
     <div class="flex items-center justify-between pb-1.5 mb-2 border-b border-cyberBorder/60">
       <h2 class="text-xs font-bold text-slate-100 flex items-center gap-1.5">
-        <span>🧠</span>
+        <Workflow :size="16" />
         <span>Agent 决策推演与事件日志</span>
       </h2>
       <span class="w-2 h-2 rounded-full bg-emerald-400 animate-ping"></span>
@@ -38,6 +38,7 @@
 <script setup lang="ts">
 import { ref, watch, nextTick } from 'vue';
 import { useEmergencyStore } from '@/stores/emergencyStore';
+import { Workflow } from 'lucide-vue-next';
 
 const store = useEmergencyStore();
 const logContainerRef = ref<HTMLElement | null>(null);
