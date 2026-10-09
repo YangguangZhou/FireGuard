@@ -13,12 +13,9 @@
           <span class="text-[10px] px-1.5 py-0.5 rounded bg-blue-950/80 text-cyan-300 border border-cyan-500/30 font-medium">
             3F 动态施工作业层
           </span>
-          <span class="text-[9px] px-1.5 py-0.5 rounded bg-slate-800 text-slate-400 border border-slate-700 font-mono hidden md:inline-block">
-            第一届“海之子”杯参赛作品
-          </span>
         </div>
         <p class="text-[10px] text-slate-400 font-sans hidden sm:block">
-          面向动态施工环境的多模态火灾应急疏散智能体系统 · 规范驱动与千人千面避险
+          面向动态施工环境的多模态火灾应急疏散智能体系统 · 规范驱动与智能避险引导
         </p>
       </div>
     </div>
@@ -43,7 +40,7 @@
       <button 
         @click="store.showReportModal = true; store.fetchReport()"
         class="px-3 py-1.5 bg-gradient-to-r from-slate-900 to-slate-800 hover:from-slate-800 hover:to-slate-700 border border-slate-700 hover:border-cyan-500/50 rounded-lg text-xs font-semibold text-slate-200 hover:text-white flex items-center gap-1.5 transition shadow">
-        <FileText :size="14" />
+          <FileText :size="14" />
         <span>应急处置记录单</span>
       </button>
     </div>
@@ -76,7 +73,7 @@ onUnmounted(() => {
 const statusTitle = computed(() => {
   switch (store.currentAct) {
     case 'ACT_1_NORMAL':
-      return '常态安全巡检 · 满足GB/T 50720';
+      return '常态安全巡检 · 通道顺畅合规';
     case 'ACT_2_FIRE':
       return '突发火情 · 动态避险光流引导中';
     case 'ACT_3_BLOCKAGE':

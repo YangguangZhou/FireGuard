@@ -15,7 +15,7 @@ export const useChatStore = defineStore('chat', () => {
     {
       id: 'init-1',
       sender: 'copilot',
-      text: '安全总监您好！我是筑安·火眼应急指挥 Copilot（由通义 Qwen 大模型驱动）。现场全作业面处于受控状态，随时为您解读 GB/T 50720 规范与分流策略。',
+      text: '安全总监您好！我是筑安·火眼应急指挥助手。现场全作业面处于受控状态，随时为您解答现场疏散态势、通道合规性与分流策略。',
       timestamp: new Date().toLocaleTimeString('zh-CN', { hour12: false }),
     },
   ]);
@@ -44,7 +44,7 @@ export const useChatStore = defineStore('chat', () => {
       messages.value.push({
         id: `err-${Date.now()}`,
         sender: 'copilot',
-        text: '通义智能中枢通信连接稍慢，请稍后重试。',
+        text: '智能决策中枢通信连接稍慢，请稍后重试。',
         timestamp: new Date().toLocaleTimeString('zh-CN', { hour12: false }),
       });
     } finally {

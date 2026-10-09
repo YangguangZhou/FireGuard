@@ -7,7 +7,7 @@
         <span>现场工友智能终端调度</span>
       </h2>
       <span class="text-[9px] px-1.5 py-0.5 rounded bg-blue-950/70 text-cyan-300 border border-cyan-800/60 font-mono">
-        qwen3.8-flash 方言语音引擎
+        智能语音调度引擎
       </span>
     </div>
 
@@ -19,16 +19,13 @@
         class="bg-slate-900/90 border rounded-lg p-2.5 transition-all shadow-sm"
         :class="getCardBorderClass(w.id)"
       >
-        <!-- 头部：姓名、工种、方言、心率 -->
+        <!-- 头部：姓名、工种、终端、心率 -->
         <div class="flex justify-between items-start mb-1.5">
           <div>
             <div class="font-bold text-xs text-white flex items-center gap-1.5">
               <span>{{ w.name }}</span>
               <span class="text-[9px] px-1.5 py-0.2 rounded bg-slate-800 text-slate-400 font-normal">
                 {{ w.role }}
-              </span>
-              <span class="text-[9px] px-1 py-0.2 rounded bg-amber-950/70 text-amber-300 border border-amber-800/60">
-                {{ getDialectTag(w.id) }}
               </span>
             </div>
             <div class="text-[10px] text-slate-400 font-mono mt-0.5">
@@ -51,7 +48,7 @@
           <div class="flex justify-between text-slate-400 mb-0.5">
             <span>分配出口:</span>
             <span class="text-cyan-400 font-semibold">
-              {{ store.currentAct === 'ACT_1_NORMAL' ? '🟢 现场巡查中 (通道畅通备用)' : (getRoute(w.id)?.exit_name || '安全避难区域') }}
+              {{ store.currentAct === 'ACT_1_NORMAL' ? '巡查待命' : (getRoute(w.id)?.exit_name || '安全避难区域') }}
             </span>
           </div>
           <div class="flex justify-between text-slate-400 text-[10px]">
@@ -80,7 +77,7 @@
               class="px-2 py-0.5 rounded bg-blue-900/70 hover:bg-blue-800 text-cyan-300 border border-cyan-500/40 text-[9px] flex items-center gap-1 shadow transition active:scale-95"
               :class="player.activeWorkerId.value === w.id && player.isPlaying.value ? 'animate-pulse ring-1 ring-cyan-400' : ''"
             >
-              <span><span class="flex items-center gap-1"><Volume2 :size="11" />{{ player.activeWorkerId.value === w.id && player.isPlaying.value ? '播报中' : '播放语音' }}</span></span>
+              <span class="flex items-center gap-1"><Volume2 :size="11" />{{ player.activeWorkerId.value === w.id && player.isPlaying.value ? '播报中' : '播放语音' }}</span>
             </button>
             <span v-else class="text-emerald-400 text-[9px]">常态待命</span>
           </div>
@@ -110,11 +107,6 @@ function getBroadcast(wId: string) {
   return store.broadcasts.find(b => b.worker_id === wId);
 }
 
-function getDialectTag(wId: string) {
-  if (wId === 'W01' || wId === 'W04') return '湖南方言';
-  if (wId === 'W02') return '四川方言';
-  return '标准普通话';
-}
 
 function getCardBorderClass(wId: string) {
   const r = getRoute(wId);

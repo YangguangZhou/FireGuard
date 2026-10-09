@@ -40,6 +40,12 @@ class TestFireGuardWorkflow(unittest.TestCase):
         self.assertEqual(compliance["compliance_status"], "COMPLIANT")
         self.assertTrue(compliance["dual_exit_compliant"])
 
+        # 检查物联网传感器与事件日志时序
+        self.assertEqual(len(self.agent.graph.sensors), 8)
+        self.assertEqual(len(self.agent.incident_log), 4)
+        for s in self.agent.graph.sensors:
+            self.assertEqual(s["status"], "NORMAL")
+
     def test_act2_fire_rerouting(self):
         """测试第二幕：东干道突发火情，出口A必须被完全切断，人员自动避难至出口B或避难平台"""
         res = self.agent.handle_incident("ACT_2_FIRE")
@@ -52,6 +58,20 @@ class TestFireGuardWorkflow(unittest.TestCase):
                 # 严禁任何人继续前往被火封锁的 EXIT_EAST
                 self.assertNotEqual(r["target_exit"], "EXIT_EAST", f"Worker {r['worker_id']} was directed to fire-blocked EXIT_EAST!")
                 self.assertNotIn("E_REBAR_EXITEAST", r["edge_ids"])
+
+        # 检查火灾传感器异动与事件处置时序链
+        smoke_east = next(s for s in self.agent.graph.sensors if s["id"] == "S_SMOKE_EAST")
+        self.assertEqual(smoke_east["status"], "ALARM")
+        self.assertEqual(smoke_east["current_value"], 480.0)
+
+        temp_east = next(s for s in self.agent.graph.sensors if s["id"] == "S_TEMP_EAST")
+        self.assertEqual(temp_east["status"], "ALARM")
+        self.assertEqual(temp_east["current_value"], 88.5)
+
+        self.assertEqual(len(self.agent.incident_log), 7)
+        self.assertEqual(self.agent.incident_log[0]["event_type"], "IOT_SENSOR_TRIGGER")
+        self.assertEqual(self.agent.incident_log[0]["sequence_id"], 1)
+        self.assertEqual(self.agent.incident_log[6]["event_type"], "HELMET_BROADCAST")
 
         # 确认语音指令已生成
         broadcasts = res["broadcasts"]
@@ -72,6 +92,16 @@ class TestFireGuardWorkflow(unittest.TestCase):
             if r["status"] == "ROUTE_READY":
                 # 西侧通道已塌陷，禁止走 EXIT_WEST 的通道
                 self.assertNotIn("E_WCORR_EXITWEST", r["edge_ids"])
+
+        # 检查西连廊净宽传感器超标阻断与二次处置时序链
+        width_west = next(s for s in self.agent.graph.sensors if s["id"] == "S_WIDTH_WEST")
+        self.assertEqual(width_west["status"], "BLOCKED")
+        self.assertEqual(width_west["current_value"], 0.35)
+
+        self.assertEqual(len(self.agent.incident_log), 7)
+        self.assertEqual(self.agent.incident_log[0]["event_type"], "IOT_CLEARANCE_ALARM")
+        self.assertEqual(self.agent.incident_log[4]["event_type"], "DYNAMIC_REPLAN")
+        self.assertEqual(self.agent.incident_log[6]["event_type"], "RESCUE_DISPATCH")
 
         # 生成正式报告验证
         report = self.agent.export_formal_emergency_report()

@@ -9,7 +9,7 @@ export interface SiteCoords {
 export interface SiteNode {
   id: string;
   name: string;
-  zone_type: 'corridor' | 'work_zone' | 'core_tube' | 'safe_exit' | 'refuge_platform' | 'stair';
+  zone_type: 'corridor' | 'work_zone' | 'core_tube' | 'core_shaft' | 'hazard_storage' | 'safe_exit' | 'refuge_platform' | 'stair';
   coords: SiteCoords;
   is_exit?: boolean;
 }
@@ -35,6 +35,34 @@ export interface WorkerInfo {
   device: string;
 }
 
+export interface ScientificMetrics {
+  path_efficiency: number;
+  static_shortest_m: number;
+  max_cost: number;
+  avg_cost: number;
+  inflexion_points: number;
+  speed_reduction_ratio: number;
+}
+
+export interface ScientificEvaluation {
+  methodology_reference: string;
+  algorithm: string;
+  fire_stage: string;
+  stage_name: string;
+  dynamic_weights: {
+    temp: number;
+    visibility: number;
+    co: number;
+    alpha?: number;
+  };
+  replan_latency_ms: number;
+  mean_path_efficiency: number;
+  max_passage_cost: number;
+  mean_passage_cost: number;
+  total_inflexion_points: number;
+  exit_utilization: Record<string, string>;
+}
+
 export interface EvacuationRoute {
   worker_id: string;
   worker_name: string;
@@ -46,6 +74,7 @@ export interface EvacuationRoute {
   edge_ids: string[];
   distance_m: number;
   est_time_sec: number;
+  scientific_metrics?: ScientificMetrics;
 }
 
 export interface WorkerBroadcast {
@@ -81,10 +110,34 @@ export interface ComplianceAudit {
 }
 
 export interface IncidentLogItem {
+  sequence_id?: number;
   timestamp: string;
+  time_offset?: string;
+  phase?: 'SENSING' | 'PERCEPTION' | 'ISOLATION' | 'PLANNING' | 'DISPATCH' | 'RESCUE' | 'AUDIT' | string;
+  phase_name?: string;
   event_type: string;
+  level?: 'INFO' | 'WARNING' | 'CRITICAL' | 'SUCCESS';
+  title?: string;
   message: string;
   details?: Record<string, any>;
+}
+
+export interface SensorItem {
+  id: string;
+  name: string;
+  type: 'smoke' | 'temp_c' | 'flame' | 'width_m' | 'co_ppm' | string;
+  node_id: string;
+  node_name: string;
+  current_value: number;
+  value?: number;
+  ppm?: number;
+  unit: string;
+  threshold: number;
+  threshold_operator: '>' | '<';
+  status: 'NORMAL' | 'WARNING' | 'ALARM' | 'BLOCKED';
+  status_text: string;
+  icon: string;
+  coords?: { x: number; y: number };
 }
 
 export interface ProjectMeta {
@@ -99,11 +152,12 @@ export interface EmergencyStateResponse {
   nodes: SiteNode[];
   edges: SiteEdge[];
   workers: WorkerInfo[];
-  sensors: any[];
+  sensors: SensorItem[];
   plan: {
     routes: EvacuationRoute[];
     compliance_audit: ComplianceAudit;
-    algorithm: string;
+    scientific_evaluation?: ScientificEvaluation;
+    algorithm?: string;
   };
   perception: PerceptionResult;
   broadcasts: WorkerBroadcast[];

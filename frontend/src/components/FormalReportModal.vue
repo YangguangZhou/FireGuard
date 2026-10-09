@@ -41,7 +41,7 @@
         <!-- 人员安全疏散清单 -->
         <div>
           <h4 class="font-bold text-cyan-400 mb-2 flex items-center gap-1.5 text-xs">
-            <span>📋</span> 一、现场人员安全疏散流向清单
+            <span>一、</span>现场人员疏散流向
           </h4>
           <div class="overflow-x-auto rounded-lg border border-slate-800">
             <table class="w-full text-left text-xs">
@@ -69,10 +69,10 @@
           </div>
         </div>
 
-        <!-- GB/T 50720 合规审计结论 -->
+        <!-- 消防安全疏散审计结论 -->
         <div>
           <h4 class="font-bold text-cyan-400 mb-2 flex items-center gap-1.5 text-xs">
-            <span>⚖️</span> 二、GB/T 50720 施工现场消防安全审计评定
+            <span>二、</span>消防疏散合规审计
           </h4>
           <div class="bg-slate-950 p-3 rounded-xl border border-slate-800 space-y-1.5 text-slate-300 leading-relaxed">
             <div class="flex items-center gap-2">
@@ -85,6 +85,100 @@
             </div>
           </div>
         </div>
+
+        <!-- 科学计算与寻径评价 -->
+        <div v-if="sciEval">
+          <h4 class="font-bold text-amber-400 mb-2 flex items-center gap-1.5 text-xs">
+            <span>三、</span>动态路径计算评价
+          </h4>
+          <div class="bg-slate-950 p-3 rounded-xl border border-slate-800 space-y-3 text-slate-300">
+            <div class="flex items-center justify-between text-[11px] pb-2 border-b border-slate-800">
+              <span class="text-slate-400">算法核心: <strong class="text-emerald-400 font-mono">{{ sciEval.algorithm }}</strong></span>
+              <span class="text-slate-400">火灾演化分期: <strong class="text-amber-400 font-bold">{{ sciEval.stage_name }} ({{ sciEval.fire_stage }})</strong></span>
+              <span class="text-slate-400">重规划响应时延: <strong class="text-cyan-400 font-mono">{{ sciEval.replan_latency_ms }} ms</strong></span>
+            </div>
+
+            <!-- 动态三物理场权重 (式 6, 7) -->
+            <div>
+              <div class="text-[11px] text-slate-400 mb-1.5 flex justify-between">
+                <span>多物理场动态主导权重:</span>
+                <span class="font-mono text-slate-300">
+                  能见度 {{ Math.round((sciEval.dynamic_weights?.visibility || 0) * 100) }}% |
+                  温度 {{ Math.round((sciEval.dynamic_weights?.temp || 0) * 100) }}% |
+                  CO浓度 {{ Math.round((sciEval.dynamic_weights?.co || 0) * 100) }}%
+                </span>
+              </div>
+              <div class="w-full h-2 bg-slate-800 rounded-full flex overflow-hidden">
+                <div class="bg-sky-500 h-full" :style="{ width: `${(sciEval.dynamic_weights?.visibility || 0) * 100}%` }"></div>
+                <div class="bg-rose-500 h-full" :style="{ width: `${(sciEval.dynamic_weights?.temp || 0) * 100}%` }"></div>
+                <div class="bg-amber-500 h-full" :style="{ width: `${(sciEval.dynamic_weights?.co || 0) * 100}%` }"></div>
+              </div>
+            </div>
+
+            <!-- 科学指标网格 -->
+            <div class="grid grid-cols-2 sm:grid-cols-4 gap-2 pt-1 font-mono text-[11px]">
+              <div class="bg-slate-900/80 p-2 rounded border border-slate-800">
+                <div class="text-slate-500 text-[10px]">路径效率 η (D/D0)</div>
+                <div class="text-emerald-400 font-bold text-xs mt-0.5">{{ sciEval.mean_path_efficiency?.toFixed(2) }}</div>
+              </div>
+              <div class="bg-slate-900/80 p-2 rounded border border-slate-800">
+                <div class="text-slate-500 text-[10px]">最大综合通行代价</div>
+                <div class="text-rose-400 font-bold text-xs mt-0.5">{{ sciEval.max_passage_cost?.toFixed(1) }}</div>
+              </div>
+              <div class="bg-slate-900/80 p-2 rounded border border-slate-800">
+                <div class="text-slate-500 text-[10px]">平均通行代价</div>
+                <div class="text-cyan-400 font-bold text-xs mt-0.5">{{ sciEval.mean_passage_cost?.toFixed(1) }}</div>
+              </div>
+              <div class="bg-slate-900/80 p-2 rounded border border-slate-800">
+                <div class="text-slate-500 text-[10px]">轨迹平滑拐点数 (≥35°)</div>
+                <div class="text-amber-400 font-bold text-xs mt-0.5">{{ sciEval.total_inflexion_points }} 个</div>
+              </div>
+            </div>
+
+            <div class="text-[10px] text-slate-500 border-t border-slate-800/80 pt-1.5 flex justify-between">
+              <span>理论模型: {{ sciEval.methodology_reference || '动态代价网络模型' }}</span>
+              <span v-if="sciEval.exit_utilization">
+                出口流量: 
+                <span v-for="(v, k) in sciEval.exit_utilization" :key="k" class="ml-1 text-slate-400">
+                  {{ k }}: {{ v }}
+                </span>
+              </span>
+            </div>
+          </div>
+        </div>
+
+        <!-- 事件处置全流程闭环时序追溯 (Steps 1 ~ 7) -->
+        <div v-if="store.reportData?.timeline_audit_log?.length">
+          <h4 class="font-bold text-indigo-400 mb-2 flex items-center gap-1.5 text-xs">
+            <span>四、</span>处置时序审计链 (1 ~ {{ store.reportData.timeline_audit_log.length }})
+          </h4>
+          <div class="bg-slate-950 p-3 rounded-xl border border-slate-800 space-y-2">
+            <div
+              v-for="log in store.reportData.timeline_audit_log"
+              :key="log.sequence_id || log.timestamp"
+              class="flex items-start gap-2 text-[11px] pb-1.5 border-b border-slate-900 last:border-b-0"
+            >
+              <span class="px-1.5 py-0.5 rounded font-mono font-bold text-[10px] bg-slate-800 text-cyan-400 shrink-0">
+                #{{ log.sequence_id || 1 }} {{ log.time_offset || '+00.0s' }}
+              </span>
+              <span
+                class="px-1.5 py-0.5 rounded text-[10px] font-bold shrink-0"
+                :class="{
+                  'bg-rose-900/60 text-rose-300': log.level === 'CRITICAL',
+                  'bg-amber-900/60 text-amber-300': log.level === 'WARNING',
+                  'bg-emerald-900/60 text-emerald-300': log.level === 'SUCCESS',
+                  'bg-blue-900/60 text-blue-300': log.level === 'INFO'
+                }"
+              >
+                {{ log.phase_name || log.phase || '处置' }}
+              </span>
+              <div class="flex-1 min-w-0">
+                <div class="font-bold text-slate-200">{{ log.title || log.event_type }}</div>
+                <div class="text-slate-400 text-[10px] line-clamp-2 mt-0.5">{{ log.message }}</div>
+              </div>
+            </div>
+          </div>
+        </div>
       </div>
 
       <!-- 底部操作按钮 -->
@@ -93,7 +187,7 @@
           @click="printReport"
           class="px-4 py-2 bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 text-white rounded-lg text-xs font-semibold shadow flex items-center gap-1.5 transition"
         >
-          <span>🖨️</span> 打印 / 另存为 PDF
+          打印 / 另存为 PDF
         </button>
         <button
           @click="store.showReportModal = false"
@@ -107,9 +201,12 @@
 </template>
 
 <script setup lang="ts">
+import { computed } from 'vue';
 import { useEmergencyStore } from '@/stores/emergencyStore';
 
 const store = useEmergencyStore();
+
+const sciEval = computed(() => store.reportData?.scientific_evaluation || store.scientificEvaluation);
 
 function printReport() {
   window.print();

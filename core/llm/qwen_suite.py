@@ -150,7 +150,7 @@ class QwenModelSuite:
             # 高保真中文容灾回退（确保答辩现场零闪退）
             if scenario_key == "incident_blockage_act3":
                 return {
-                    "source": f"QWEN3_VL_FLASH_SIMULATION (备用响应: {str(e)[:30]})",
+                    "source": f"SIMULATION (备用响应: {str(e)[:30]})",
                     "fire_detected": False,
                     "smoke_detected": True,
                     "confidence": 0.94,
@@ -158,10 +158,10 @@ class QwenModelSuite:
                     "structural_obstacle": True,
                     "affected_zone": "西侧避难爬梯连廊通道",
                     "obstacle_width_remaining_m": 0.35,
-                    "agent_perception_summary": "通义视觉模型预警：西侧连廊遭遇模板脚手架侧翻坍塌，实测通行净宽仅约零点三五米，严重低于工程消防标准规范强约束，该通道已完全失效！"
+                    "agent_perception_summary": "智能视觉模型预警：西侧连廊遭遇模板脚手架侧翻坍塌，实测通行净宽仅约零点三五米，严重低于施工安全通行极限，该通道已完全失效！"
                 }
             return {
-                "source": f"QWEN3_VL_FLASH_SIMULATION (备用响应: {str(e)[:30]})",
+                "source": f"SIMULATION (备用响应: {str(e)[:30]})",
                 "fire_detected": True,
                 "smoke_detected": True,
                 "confidence": 0.97,
@@ -169,11 +169,11 @@ class QwenModelSuite:
                 "structural_obstacle": False,
                 "affected_zone": "核心筒东侧木模板加工区及配电箱",
                 "affected_edges": ["E_NCORR_REBAR", "E_REBAR_EXITEAST"],
-                "agent_perception_summary": "通义视觉模型识别到东侧主干道及配电箱突发剧烈明火！高浓度黑烟正沿通道快速向东现浇楼梯蔓延，东侧通道已被封锁！"
+                "agent_perception_summary": "智能视觉模型识别到东侧主干道及配电箱突发剧烈明火！高浓度黑烟正沿通道快速向东现浇楼梯蔓延，东侧通道已被封锁！"
             }
 
     # ==========================================
-    # 2. 安全总监大屏指挥问答: qwen-plus / qwen3.7-plus
+    # 2. 安全总监大屏指挥问答
     # ==========================================
     def ask_commander_copilot(
         self,
@@ -183,13 +183,12 @@ class QwenModelSuite:
         compliance_audit: Dict
     ) -> str:
         """
-        调用 qwen-plus 进行深层次工程规范与态势推理问答
+        调用大语言模型进行深层次工程规范与态势推理问答
         限定纯中文输出
         """
         system_prompt = (
             "你是中国建筑国际·筑安火眼智慧工地应急指挥智能体中枢。"
-            "你需要严格根据提供的【当前施工现场实时态势】和《建设工程施工现场消防安全技术规范》（GB/T 50720-2011）、"
-            "《建筑设计防火规范》（GB 50016）回答安全总监的提问。"
+            "你需要严格根据提供的【当前施工现场实时态势】和施工现场消防安全技术规范回答安全总监的提问。"
             "【输出语言绝对约束】：必须全部使用规范中文汉字回答，严禁混入英文字母或单词！"
         )
 
@@ -201,7 +200,7 @@ class QwenModelSuite:
         context_prompt = (
             f"【当前施工阶段】: {current_act}\n"
             f"【工友实时疏散规划】: {routes_summary}\n"
-            f"【GB/T 50720合规审计】: 双出口分流={compliance_audit.get('dual_exit_compliant')}, "
+            f"【消防合规审计】: 双出口分流={compliance_audit.get('dual_exit_compliant')}, "
             f"最大疏散距离={compliance_audit.get('max_evac_distance_m')}米, "
             f"审计状态={compliance_audit.get('compliance_status')}\n\n"
             f"安全总监问题: {question}\n"
@@ -229,40 +228,34 @@ class QwenModelSuite:
         q = question.lower()
         if "出口" in q or "安全" in q:
             return (
-                "【通义智能决策中枢】当前处于应急态势。依据建筑消防技术规范双出口分流原则："
+                "【智能决策中枢】当前处于应急态势。依据建筑消防技术规范双出口分流原则："
                 "东侧现浇楼梯受明火烟气威胁已实施硬隔离封闭；西侧外架临时爬梯与南立面悬挑避难平台为当前指定安全通道！"
             )
-        return "【通义智能决策中枢】现场四位工友均已完成逃生动线规划，疏散通道净宽与距离符合施工现场消防规范。"
+        return "【智能决策中枢】现场四位工友均已完成逃生动线规划，疏散通道净宽与距离符合施工现场消防规范。"
 
     # ==========================================
-    # 3. 工友安全帽播报词生成: qwen3.8-flash (千人千面方言)
+    # 3. 工友安全帽语音播报词生成 (标准普通话)
     # ==========================================
     def generate_dialect_broadcast(
         self,
         worker_name: str,
         role: str,
-        dialect: str,  # 'hunan', 'sichuan', 'mandarin'
-        target_exit: str,
-        path_desc: str,
-        est_seconds: float
+        dialect: str = "mandarin",
+        target_exit: str = "安全出口",
+        path_desc: str = "通道",
+        est_seconds: float = 20.0
     ) -> str:
         """
-        调用 qwen3.8-flash 极速生成充满亲切感与警醒力的一线方言避险播报
-        严格限定纯中文输出，支持湖南话、四川话、普通话
+        生成清晰、沉稳、指令明确的施工现场标准普通话紧急避险播报
+        严格限定纯中文输出
         """
-        dialect_style = "规范普通话，语气坚定沉稳"
-        if dialect == "hunan":
-            dialect_style = "地道的湖南长沙方言口吻（例如：哎呀师傅咯、莫慌、快点子、往那边走起、莫呛倒烟）"
-        elif dialect == "sichuan":
-            dialect_style = "地道的四川方言口吻（例如：师傅嘞、莫慌张、赶紧的、朝后头走、弯倒腰、要得）"
-
         prompt = (
             f"请为建筑工地工友【{worker_name}（{role}）】生成一句通过智能安全帽骨传导下发的火灾逃生紧急播报词。\n"
             f"要求：\n"
-            f"1. 必须使用【{dialect_style}】；\n"
+            f"1. 必须使用标准规范的普通话，语气坚定、沉着、清晰；\n"
             f"2. 明确指令：不要往被火封锁的东楼梯跑，立即前往【{target_exit}】；\n"
             f"3. 简述路线：途经【{path_desc}】，预计耗时约 {int(est_seconds)} 秒；\n"
-            f"4. 提醒压低身姿避烟，语言口语化、接地气、具有亲和力，字数在40-60字左右；\n"
+            f"4. 提醒压低身姿避烟，语言简明易懂，字数在40-60字左右；\n"
             f"5. 【绝对约束】：输出必须全部为中文汉字和标点符号，严禁输出任何英文字母、英文单词或拼音！"
         )
 
@@ -271,10 +264,10 @@ class QwenModelSuite:
                 resp = self._call_chat_completion(
                     model=model_name,
                     messages=[
-                        {"role": "system", "content": "你是一名智慧工地现场播报员。必须全部使用纯正中文输出，严禁任何英文。"},
+                        {"role": "system", "content": "你是一名智慧工地现场播报员。必须全部使用规范中文普通话输出，严禁任何英文。"},
                         {"role": "user", "content": prompt}
                     ],
-                    temperature=0.7,
+                    temperature=0.5,
                     max_tokens=150,
                     timeout=25
                 )
@@ -285,12 +278,8 @@ class QwenModelSuite:
             except Exception:
                 continue
 
-        # 离线方言模板（纯正中文保障）
-        if dialect == "hunan":
-            return f"【湖南话播报】{worker_name}师傅咯！东边起大火了莫往那边跑！快点子顺着{path_desc}去【{target_exit}】，压低身子莫呛倒烟，抓紧跑起！"
-        elif dialect == "sichuan":
-            return f"【四川话播报】{worker_name}师傅嘞！东边主楼梯遭火烧拢了莫得路，赶紧朝【{target_exit}】撤，弯倒腰莫吸到烟，搞快点要得！"
-        return f"【应急指令】{worker_name}师傅：东侧已被烟火封锁，请立即经{path_desc}前往【{target_exit}】，预计{int(est_seconds)}秒，压低身姿避险！"
+        # 离线保底模板（标准普通话）
+        return f"【应急指令】{worker_name}师傅：东侧通道已被烟火封锁，请立即经由{path_desc}前往【{target_exit}】，预计用时{int(est_seconds)}秒，请压低身姿，迅速有序撤离！"
 
     # ==========================================
     # 4. 智能语音音频文件合成管线 (.wav 文件生成)

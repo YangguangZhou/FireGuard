@@ -10,7 +10,9 @@ import type {
   PerceptionResult, 
   ComplianceAudit, 
   IncidentLogItem, 
-  ProjectMeta 
+  ProjectMeta,
+  SensorItem,
+  ScientificEvaluation
 } from '@/types/emergency';
 import { fireguardApi } from '@/api/fireguardApi';
 
@@ -35,15 +37,17 @@ export const useEmergencyStore = defineStore('emergency', () => {
   const projectMeta = ref<ProjectMeta>({
     project_name: '长沙市某超高层建筑结构主体施工现场',
     floor_level: '3F 施工作业层 (现浇主体)',
-    standard_applied: 'GB/T 50720-2011 建设工程施工现场消防安全技术规范',
+    standard_applied: '建设工程施工现场消防安全技术规程',
   });
 
   const nodes = ref<SiteNode[]>([]);
   const edges = ref<SiteEdge[]>([]);
   const workers = ref<WorkerInfo[]>([]);
+  const sensors = ref<SensorItem[]>([]);
   const routes = ref<EvacuationRoute[]>([]);
   const broadcasts = ref<WorkerBroadcast[]>([]);
   const logs = ref<IncidentLogItem[]>([]);
+  const scientificEvaluation = ref<ScientificEvaluation | null>(null);
 
   const perception = ref<PerceptionResult>({
     fire_detected: false,
@@ -94,7 +98,7 @@ export const useEmergencyStore = defineStore('emergency', () => {
       act: 'REPORT',
       label: '全员避险处置记录',
       tag: '阶段 3',
-      desc: '全员脱困 · 导出 GB/T 50720 规范应急记录单',
+      desc: '全员脱困 · 导出标准应急处置记录单',
       color: 'cyan',
     },
   ];
@@ -110,6 +114,18 @@ export const useEmergencyStore = defineStore('emergency', () => {
     return currentAct.value === 'ACT_3_BLOCKAGE';
   });
 
+  const alarmingSensorsCount = computed(() => {
+    return sensors.value.filter(s => s.status === 'ALARM' || s.status === 'BLOCKED').length;
+  });
+
+  const warningSensorsCount = computed(() => {
+    return sensors.value.filter(s => s.status === 'WARNING').length;
+  });
+
+  const normalSensorsCount = computed(() => {
+    return sensors.value.filter(s => s.status === 'NORMAL').length;
+  });
+
   // 动作与业务流
   async function fetchState() {
     try {
@@ -120,10 +136,12 @@ export const useEmergencyStore = defineStore('emergency', () => {
       nodes.value = data.nodes || [];
       edges.value = data.edges || [];
       workers.value = data.workers || [];
+      sensors.value = data.sensors || [];
       routes.value = data.plan?.routes || [];
       broadcasts.value = data.broadcasts || [];
       perception.value = data.perception || perception.value;
       compliance.value = data.plan?.compliance_audit || compliance.value;
+      scientificEvaluation.value = data.plan?.scientific_evaluation || null;
       logs.value = data.incident_log || [];
     } catch (err) {
       console.error('获取现场态势失败:', err);
@@ -209,14 +227,19 @@ export const useEmergencyStore = defineStore('emergency', () => {
     nodes,
     edges,
     workers,
+    sensors,
     routes,
     broadcasts,
     perception,
     compliance,
+    scientificEvaluation,
     logs,
     drillSteps,
     isFireScene,
     isBlockageScene,
+    alarmingSensorsCount,
+    warningSensorsCount,
+    normalSensorsCount,
     fetchState,
     triggerAct,
     jumpToStep,

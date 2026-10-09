@@ -9,7 +9,6 @@ body { margin: 0; min-width: 360px; background: #070b12; color: #e2e8f0; font-fa
     radial-gradient(ellipse at 52% -24%, rgba(14, 116, 144, .13), transparent 52%),
     linear-gradient(180deg, #090f19 0%, #070b12 44%, #080c13 100%);
 }
-
 .bg-cyberPanelSoft {
   background-color: rgba(13, 20, 31, .9);
   background-image: linear-gradient(145deg, rgba(38, 64, 91, .14), transparent 52%);
@@ -17,6 +16,7 @@ body { margin: 0; min-width: 360px; background: #070b12; color: #e2e8f0; font-fa
 }
 .border-cyberBorder { border-color: rgba(116, 145, 177, .16); }
 ::selection { background: rgba(34, 211, 238, .28); color: #f8fafc; }
+button:focus-visible { outline: 2px solid rgba(103, 232, 249, .8); outline-offset: 2px; }
 
 /* 自定义暗黑科技大屏滚动条 */
 ::-webkit-scrollbar {

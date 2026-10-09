@@ -43,12 +43,12 @@
       </div>
     </div>
 
-    <!-- qwen3-vl-flash 视觉研判简报 -->
+    <!-- 智能视觉研判简报 -->
     <div class="mt-2.5 bg-slate-950/90 p-2 rounded-lg border border-slate-800/80 text-[10px]">
       <div class="text-cyan-400 font-semibold mb-1 flex items-center justify-between">
         <span class="flex items-center gap-1">
           <ScanEye :size="13" />
-          <span>qwen3-vl-flash 研判:</span>
+          <span>智能视觉研判:</span>
         </span>
         <span
           class="font-mono px-1.5 py-0.2 rounded text-[9px] font-bold"

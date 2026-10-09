@@ -4,10 +4,10 @@
     <div class="flex items-center justify-between pb-1.5 mb-2 border-b border-cyberBorder/60">
       <h2 class="text-xs font-bold text-slate-100 flex items-center gap-1.5">
         <Bot :size="14" />
-        <span>安全总监 Copilot (qwen-plus / qwen3.7-plus)</span>
+        <span>安全总监智能助手</span>
       </h2>
-      <span class="text-[9px] px-1.5 py-0.5 rounded bg-cyan-950/60 text-cyan-300 border border-cyan-800/60">
-        GB/T 50720 规则推理
+      <span class="text-[9px] px-1.5 py-0.5 rounded bg-cyan-950/60 text-cyan-300 border border-cyan-800/60 font-mono">
+        应急指挥协同
       </span>
     </div>
 
@@ -44,7 +44,7 @@
       <!-- 思考中指示器 -->
       <div v-if="chatStore.isThinking" class="text-left">
         <span class="inline-block px-2 py-1 rounded bg-slate-900 border border-slate-800 text-cyan-400 text-[10px] animate-pulse">
-          通义模型推理中...
+          智能决策中枢推理中...
         </span>
       </div>
     </div>
@@ -81,7 +81,7 @@ const chatBoxRef = ref<HTMLElement | null>(null);
 const quickPrompts = [
   { label: '哪个出口安全？', query: '当前哪个出口最安全，依据什么规范？' },
   { label: '工友位置？', query: '木工李强班组撤离到了哪里？' },
-  { label: '合规性判定？', query: '当前方案是否符合GB/T 50720施工消防技术规范？' },
+  { label: '合规性判定？', query: '当前逃生方案是否符合现场消防安全疏散规范？' },
 ];
 
 function handleSend() {
