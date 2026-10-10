@@ -1,20 +1,35 @@
 <template>
-  <div class="app-shell min-h-screen text-slate-100 flex flex-col font-tech selection:bg-cyan-500 selection:text-slate-950">
+  <div class="app-shell min-h-screen text-slate-100 flex flex-col font-tech selection:bg-cyan-500 selection:text-slate-950 relative">
+    <!-- Animated Grid Overlay Background -->
+    <div class="fixed inset-0 pointer-events-none opacity-[0.04] bg-[linear-gradient(to_right,#80808012_1px,transparent_1px),linear-gradient(to_bottom,#80808012_1px,transparent_1px)] bg-[size:24px_24px] z-[-1]"></div>
+    <div class="fixed inset-0 pointer-events-none bg-gradient-to-b from-slate-950 via-slate-900/95 to-slate-950 -z-20"></div>
+
     <!-- 顶部统一导航栏 -->
     <TopNavbar />
 
     <!-- 主展示工作区 -->
-    <main class="flex-1 p-4 md:p-5 flex flex-col gap-4 max-w-[1920px] w-full mx-auto">
-      <div class="flex flex-wrap items-end justify-between gap-3 px-1">
+    <main class="flex-1 p-4 md:p-5 flex flex-col gap-4 max-w-[1920px] w-full mx-auto relative z-10">
+      
+      <!-- Header Section -->
+      <div class="flex flex-wrap items-end justify-between gap-4 px-2 py-1 mb-1 border-l-4 border-cyan-500/50 pl-4 bg-gradient-to-r from-cyan-900/20 to-transparent rounded-r-lg">
         <div>
-          <div class="mb-1 text-[10px] font-semibold uppercase tracking-[.22em] text-cyan-300/75">FIREGUARD / OPERATIONS</div>
-          <h1 class="text-lg font-semibold tracking-wide text-white md:text-xl">现场安全指挥</h1>
+          <div class="mb-1.5 text-[11px] font-bold uppercase tracking-[.25em] text-cyan-400/80">FIREGUARD <span class="mx-1 opacity-50">/</span> OPERATIONS</div>
+          <h1 class="text-xl font-bold tracking-widest text-white md:text-2xl text-shimmer">现场安全指挥</h1>
         </div>
-        <div class="flex items-center gap-2 rounded-full border border-emerald-400/20 bg-emerald-400/[.06] px-3 py-1.5 text-[10px] font-medium text-emerald-200">
-          <span class="relative flex h-2 w-2"><span class="absolute inline-flex h-full w-full animate-ping rounded-full bg-emerald-400 opacity-50"></span><span class="relative inline-flex h-2 w-2 rounded-full bg-emerald-400"></span></span>
+        <div class="flex items-center gap-2.5 rounded-full border border-emerald-400/30 bg-emerald-950/40 px-4 py-2 text-xs font-bold tracking-wider text-emerald-300 shadow-glow-green backdrop-blur-sm">
+          <span class="relative flex h-2 w-2">
+            <span class="absolute inline-flex h-full w-full animate-ping rounded-full bg-emerald-400 opacity-60"></span>
+            <span class="relative inline-flex h-2 w-2 rounded-full bg-emerald-400 glow-dot"></span>
+          </span>
           实时监测
         </div>
       </div>
+      
+      <!-- Decorative Divider -->
+      <div class="w-full h-px bg-gradient-to-r from-cyan-500/0 via-cyan-500/20 to-cyan-500/0 mb-2 relative">
+        <div class="absolute left-1/4 top-1/2 -translate-x-1/2 -translate-y-1/2 w-16 h-[2px] bg-cyan-400/40 blur-[1px]"></div>
+      </div>
+
       <!-- 演练推演顺序时间轴控制器 -->
       <DrillTimeline />
 

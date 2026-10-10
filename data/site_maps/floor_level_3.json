@@ -224,7 +224,7 @@
   "workers": [
     {
       "id": "W01",
-      "name": "李强",
+      "name": "李伟",
       "role": "模板班组长",
       "current_node": "N_WOOD",
       "heart_rate": 82,
@@ -242,7 +242,7 @@
     },
     {
       "id": "W03",
-      "name": "张伟",
+      "name": "张强",
       "role": "钢筋电焊工",
       "current_node": "N_REBAR",
       "heart_rate": 88,

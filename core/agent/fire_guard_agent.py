@@ -115,7 +115,7 @@ class FireGuardAgent:
                 phase_name="人员纳管",
                 level="INFO",
                 title="4名作业人员智能安全帽/工牌链路就绪",
-                message="李强、王建国、张伟、赵红兵定位信标与骨传导语音信道在线，体征心率正常，现场处于常态安全受控状态。",
+                message="李伟、王建国、张强、赵红兵定位信标与骨传导语音信道在线，体征心率正常，现场处于常态安全受控状态。",
                 details={"workers_count": 4, "devices": ["智能安全帽#101", "智能安全帽#102", "智能工牌#205", "智能安全帽#108"]}
             )
 
@@ -235,8 +235,8 @@ class FireGuardAgent:
                 phase_name="动态寻路",
                 level="SUCCESS",
                 title="加权 A* 动态寻优：实现双出口防踩踏分流",
-                message="图拓扑路由引擎 4.2ms 完成全场人员加权 A* 动态重规划：剔除东出口A，木工组（李强、王建国）分流向西出口B（西外架爬梯），钢筋工张伟与混凝土工赵红兵导向南避难平台C，避免人流对冲踩踏。",
-                details={"algorithm": "Weighted A* Dynamic Routing", "compute_time_ms": 4.2, "diverted_exit_b": ["李强(W01)", "王建国(W02)"], "diverted_exit_c": ["张伟(W03)", "赵红兵(W04)"], "dual_exit_compliant": True}
+                message="图拓扑路由引擎 4.2ms 完成全场人员加权 A* 动态重规划：剔除东出口A，木工组（李伟、王建国）分流向西出口B（西外架爬梯），钢筋工张强与混凝土工赵红兵导向南避难平台C，避免人流对冲踩踏。",
+                details={"algorithm": "Weighted A* Dynamic Routing", "compute_time_ms": 4.2, "diverted_exit_b": ["李伟(W01)", "王建国(W02)"], "diverted_exit_c": ["张强(W03)", "赵红兵(W04)"], "dual_exit_compliant": True}
             )
             # 步骤 6: 语音播报词生成
             self._log_event(
@@ -352,7 +352,7 @@ class FireGuardAgent:
                 level="CRITICAL",
                 title="触碰临时疏散通行净宽底线：切断西出口B",
                 message="依据施工现场消防疏散安全要求（临时疏散通道净宽不得小于0.6m），当前净宽 0.35m 存在严重挤压踩踏隐患，智能体强制切断 E_WCORR_EXITWEST，西出口B路径失效！",
-                details={"rule": "施工现场临时疏散通道宽度标准", "edge_id": "E_WCORR_EXITWEST", "blocked": True, "affected_workers": ["李强(W01)", "王建国(W02)"]}
+                details={"rule": "施工现场临时疏散通道宽度标准", "edge_id": "E_WCORR_EXITWEST", "blocked": True, "affected_workers": ["李伟(W01)", "王建国(W02)"]}
             )
             # 步骤 5: 动态二次重规划寻优
             self._log_event(
@@ -363,9 +363,9 @@ class FireGuardAgent:
                 phase="PLANNING",
                 phase_name="二次重算",
                 level="SUCCESS",
-                title="动态二次重规划：李强/王建国秒级改道避难平台C",
-                message="智能体启动二次容灾重路由算法（耗时 3.8ms）：东出口A受火灾封锁，西出口B受坍塌阻断，系统将西侧受阻的李强、王建国动态重路由至【南立面临时避难平台C】（经西通道 -> 南走廊 -> 避难平台），全场人员全员锁定新安全逃生动线！",
-                details={"algorithm": "Secondary Re-Route A*", "compute_time_ms": 3.8, "new_target_exit": "EXIT_REFUGE (临时避难平台C)", "rerouted_workers": ["李强(W01)", "王建国(W02)"]}
+                title="动态二次重规划：李伟/王建国秒级改道避难平台C",
+                message="智能体启动二次容灾重路由算法（耗时 3.8ms）：东出口A受火灾封锁，西出口B受坍塌阻断，系统将西侧受阻的李伟、王建国动态重路由至【南立面临时避难平台C】（经西通道 -> 南走廊 -> 避难平台），全场人员全员锁定新安全逃生动线！",
+                details={"algorithm": "Secondary Re-Route A*", "compute_time_ms": 3.8, "new_target_exit": "EXIT_REFUGE (临时避难平台C)", "rerouted_workers": ["李伟(W01)", "王建国(W02)"]}
             )
             # 步骤 6: 语音紧急纠偏插播
             self._log_event(

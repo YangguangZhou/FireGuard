@@ -113,7 +113,7 @@ class TestFireGuardWorkflow(unittest.TestCase):
         ans1 = self.agent.query_agent_chat("当前哪个出口最安全？")
         self.assertTrue(any(k in ans1 for k in ["出口", "安全", "疏散", "GB"]))
 
-        ans2 = self.agent.query_agent_chat("木工李强班组撤离到了哪里？")
+        ans2 = self.agent.query_agent_chat("木工李伟班组撤离到了哪里？")
         self.assertTrue(len(ans2) > 10)
 
         ans3 = self.agent.query_agent_chat("当前方案是否符合GB/T 50720？")
